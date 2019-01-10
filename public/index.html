@@ -4,26 +4,12 @@
   <meta charset="UTF-8">
   <title>Main</title>
   <!-- <link rel="stylesheet" href="style.css"> -->
-  <script src="elm.js"></script>
 </head>
 <body>
+  <div id="elm"></div>
   <div id="game">
   </div>
-  <div id="elm"></div>
-  <script>
-    const app = Elm.Main.init({
-      node: document.getElementById('elm')
-    });
-
-    const testAction = () => {
-      app.ports.setModel.send('new message 2')
-    }
-
-    app.ports.getModel.subscribe((model) => {
-      console.log('model logged: ', model);
-    })
-
-    testAction()
-  </script>
+  <script src="elm.js"></script>
+  <script src="bundle.js"></script>
 </body>
 </html>

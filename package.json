@@ -6,10 +6,21 @@
   "private": true,
   "scripts": {
     "elm": "elm make elm/Main.elm --output public/elm.js",
-    "start": ""
+    "watch": "watchify js/index.js -o public/bundle.js -t [ babelify ] --debug",
+    "start": "http-server -p 8080"
   },
   "dependencies": {
-    "elm": "^0.19.0-bugfix2",
-    "pixi.js": "^4.8.5"
+    "elm": "0.19.0-bugfix2",
+    "pixi.js": "4.8.5"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.2",
+    "@babel/preset-env": "7.2.3",
+    "babelify": "10.0.0",
+    "browserify": "16.2.3",
+    "eslint": "5.12.0",
+    "http-server": "0.11.1",
+    "prettier": "1.15.3",
+    "watchify": "3.11.0"
   }
 }

@@ -16,3 +16,17 @@ document.getElementById('game').appendChild(app.view)
 app.loader.load(() => { 
   console.log('pixi loaded!')
 })
+
+const elmApp = Elm.Main.init({
+  node: document.getElementById('elm')
+});
+
+const testAction = () => {
+  elmApp.ports.setModel.send('new message 2')
+}
+
+elmApp.ports.getModel.subscribe((model) => {
+  console.log('model logged: ', model);
+})
+
+testAction()
