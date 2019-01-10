@@ -1,0 +1,8 @@
+body {
+  background-color: rgb(94, 94, 94);
+}
+
+#game * {
+  width: 800px;
+  height: 600px;
+}
