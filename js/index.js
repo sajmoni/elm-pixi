@@ -14,19 +14,25 @@ document.getElementById('game').appendChild(app.view)
 
 // app.loader.add('assets/spritesheet.json')
 
-const entity = {
-  
-}
+const entity = {}
 
 app.loader.load(() => { 
   
   const elmApp = Elm.Main.init({
     node: document.getElementById('elm')
-  });
+  })
+    
+  const updateSquare = ({id}) => {
+    elmApp.ports.updateSquare.send(id)
+  }
 
   elmApp.ports.initPort.subscribe((model) => {
     model.forEach(({ id, x, y }) => {
       const graphics = new PIXI.Graphics()
+      graphics.interactive = true
+      graphics.on('mousedown', () => {
+        updateSquare({id})
+      })
 
       app.stage.addChild(graphics)
       
@@ -45,8 +51,5 @@ app.loader.load(() => {
   })
 })
 
-// const testAction = () => {
-//   elmApp.ports.setModel.send('new message 2')
-// }
 
 // testAction()

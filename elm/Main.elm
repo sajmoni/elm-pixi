@@ -17,7 +17,7 @@ type alias Model =
 -- Incoming actions
 
 
-port setModel : (Model -> msg) -> Sub msg
+port updateSquare : (String -> msg) -> Sub msg
 
 
 
@@ -35,7 +35,7 @@ type alias Delta =
 
 
 type Msg
-    = SetModel Model
+    = UpdateSquare String
     | Tick Delta
 
 
@@ -54,12 +54,24 @@ updateEntity delta entity =
     { entity | x = entity.x + delta / 10 }
 
 
+resetEntity entity =
+    { entity | x = 50 }
+
+
 update msg lastModel =
     let
         newModel =
             case msg of
-                SetModel model ->
-                    model
+                UpdateSquare idToUpdate ->
+                    List.map
+                        (\entity ->
+                            if entity.id == idToUpdate then
+                                resetEntity entity
+
+                            else
+                                entity
+                        )
+                        lastModel
 
                 Tick delta ->
                     List.map (updateEntity delta) lastModel
@@ -68,7 +80,7 @@ update msg lastModel =
 
 
 subscriptions model =
-    Sub.batch [ setModel SetModel, Browser.Events.onAnimationFrameDelta Tick ]
+    Sub.batch [ updateSquare UpdateSquare, Browser.Events.onAnimationFrameDelta Tick ]
 
 
 main : Program () Model Msg
