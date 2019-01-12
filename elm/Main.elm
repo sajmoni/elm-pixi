@@ -39,6 +39,7 @@ type Msg
     | Tick Delta
 
 
+init : flags -> ( Model, Cmd msg )
 init _ =
     let
         initialModel =
@@ -50,14 +51,17 @@ init _ =
     ( initialModel, initPort initialModel )
 
 
+updateEntity : Delta -> Entity -> Entity
 updateEntity delta entity =
     { entity | x = entity.x + delta / 10 }
 
 
+resetEntity : Entity -> Entity
 resetEntity entity =
     { entity | x = 50 }
 
 
+update : Msg -> Model -> ( Model, Cmd msg )
 update msg lastModel =
     let
         newModel =
@@ -79,6 +83,7 @@ update msg lastModel =
     ( newModel, updatePort newModel )
 
 
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch [ updateSquare UpdateSquare, Browser.Events.onAnimationFrameDelta Tick ]
 
