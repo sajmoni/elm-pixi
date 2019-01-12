@@ -13,10 +13,21 @@ type alias Model =
     List Entity
 
 
+
+-- Incoming actions
+
+
 port setModel : (Model -> msg) -> Sub msg
 
 
-port getModel : Model -> Cmd msg
+
+-- Outgoing subscriptions
+
+
+port updatePort : Model -> Cmd msg
+
+
+port initPort : Model -> Cmd msg
 
 
 type alias Delta =
@@ -31,9 +42,12 @@ type Msg
 init _ =
     let
         initialModel =
-            [ { id = "square", x = 50, y = 50 } ]
+            [ Entity "square1" 50 50
+            , Entity "square2" 150 150
+            , Entity "square3" 250 250
+            ]
     in
-    ( initialModel, getModel initialModel )
+    ( initialModel, initPort initialModel )
 
 
 updateEntity delta entity =
@@ -50,7 +64,7 @@ update msg lastModel =
                 Tick delta ->
                     List.map (updateEntity delta) lastModel
     in
-    ( newModel, getModel newModel )
+    ( newModel, updatePort newModel )
 
 
 subscriptions model =

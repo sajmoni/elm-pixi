@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js'
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 // settings.RESOLUTION = window.devicePixelRatio
 PIXI.settings.RESOLUTION = 2
+
 const app = new PIXI.Application({
   width: 800,
   height: 600,
@@ -18,17 +19,22 @@ const entity = {
 }
 
 app.loader.load(() => { 
-  const graphics = new PIXI.Graphics()
-  entity.square = graphics
-  app.stage.addChild(graphics)
   
-  console.log('pixi loaded!')
-
   const elmApp = Elm.Main.init({
     node: document.getElementById('elm')
   });
+
+  elmApp.ports.initPort.subscribe((model) => {
+    model.forEach(({ id, x, y }) => {
+      const graphics = new PIXI.Graphics()
+
+      app.stage.addChild(graphics)
+      
+      entity[id] = graphics
+    })
+  })
   
-  elmApp.ports.getModel.subscribe((model) => {
+  elmApp.ports.updatePort.subscribe((model) => {
     model.forEach(({id, x, y}) => {
       entity[id]
         .clear()
@@ -38,7 +44,6 @@ app.loader.load(() => {
     })
   })
 })
-
 
 // const testAction = () => {
 //   elmApp.ports.setModel.send('new message 2')
