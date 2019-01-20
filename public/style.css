@@ -1,8 +1,10 @@
 body {
   background-color: rgb(94, 94, 94);
+  width: 100%;
+  height: 1000px;
 }
 
-#game * {
-  height: 1136px;
-  width: 640px;
+#elm {
+  width: 100%;
+  height: 1000px;
 }
