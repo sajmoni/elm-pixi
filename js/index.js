@@ -22,7 +22,7 @@ const init = () => {
   });
 
   const updateSquare = (id) => {
-    elmApp.ports.incomingPort.send(id);
+    elmApp.ports.updateSquare.send(id);
   };
 
   elmApp.ports.initPort.subscribe((model) => {
