@@ -13,7 +13,9 @@ const app = new PIXI.Application({
 
 document.getElementById('game').appendChild(app.view);
 
+// TODO: Auto-load all spritesheets
 app.loader.add('spritesheet/food.json');
+app.loader.add('spritesheet/monster.json');
 
 const getTexture = makeGetTexture(app);
 
@@ -69,6 +71,22 @@ const init = () => {
         text.x = x;
         text.y = y;
         add(id, text);
+      });
+
+    model
+      .filter(e => e.pixiType === 'AnimatedSprite')
+      .forEach(({
+        id, x, y, scale,
+      }) => {
+        const monster = new PIXI.extras.AnimatedSprite(['monster_01', 'monster_02'].map(getTexture));
+
+        monster.x = x;
+        monster.y = y;
+        monster.scale.set(scale);
+        monster.play();
+        monster.animationSpeed = 0.05;
+
+        add(id, monster);
       });
   });
 

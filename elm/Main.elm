@@ -15,6 +15,10 @@ import Time
 --     | Text
 
 
+animatedSprite =
+    "AnimatedSprite"
+
+
 type alias Model =
     { entities : List Entity
     , updates : Int
@@ -49,22 +53,37 @@ getInitialEntities times =
     List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)) "Graphics" 3)
 
 
+initialSceneEntities : List Entity
+initialSceneEntities =
+    [ Entity "titleText" 300 300 "Text" 1
+    , Entity "monster1" 300 500 animatedSprite 5
+    ]
+        ++ getInitialEntities 10
+
+
+initialSceneBehaviors : List Entity -> List Behavior
+initialSceneBehaviors entities =
+    Behavior "animateText" "titleText" (Juice.sine { start = 1, end = 1.2, duration = 120 }) updateScale
+        :: List.map (\s -> Behavior "moveSquare" s.id (\_ -> 1) moveRight)
+            (List.filter
+                (\e -> e.pixiType == "Graphics")
+                entities
+            )
+
+
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
-        textEntity =
-            Entity "titleText" 300 300 "Text" 1
+        entities =
+            initialSceneEntities
 
-        squares =
-            getInitialEntities 10
+        behaviors =
+            initialSceneBehaviors entities
 
         initialModel =
-            { entities = textEntity :: squares
-            , updates = 0
-            , behaviors =
-                Behavior "animateText" textEntity.id (Juice.sine { start = 1, end = 1.2, duration = 120 }) updateScale
-                    :: List.map (\s -> Behavior "moveSquare" s.id (\_ -> 1) moveRight)
-                        squares
+            { updates = 0
+            , entities = entities
+            , behaviors = behaviors
             }
     in
     ( initialModel, initPort initialModel.entities )
@@ -110,7 +129,6 @@ update msg lastModel =
 
                 Tick delta ->
                     { lastModel
-                      -- | entities = lastModel.entities |> List.map (updateEntity delta lastModel.animateText lastModel.updates)
                         | entities = lastModel.behaviors |> List.map (run lastModel.updates delta lastModel.entities)
                         , updates = lastModel.updates + 1
                     }
