@@ -12,14 +12,26 @@ import Time
 --     | Text
 
 
+type alias Behavior =
+    { id : String
+    , entityId : String
+    , transformation : Int -> Float
+    , onUpdate : (Int -> Float) -> Int -> Delta -> Entity -> Entity
+    }
+
+
 type alias Entity =
     { id : String, x : Float, y : Float, pixiType : String, scale : Float }
 
 
+emptyEntity =
+    Entity "incorrectId" 0 0 "NoPixiType" 1
+
+
 type alias Model =
     { entities : List Entity
-    , animateText : Int -> Float
     , updates : Int
+    , behaviors : List Behavior
     }
 
 
@@ -57,22 +69,32 @@ getInitialEntities times =
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
+        textEntity =
+            Entity "titleText" 200 300 "Text" 1
+
+        squares =
+            getInitialEntities 10
+
         initialModel =
-            { entities = Entity "titleText" 200 300 "Text" 1 :: getInitialEntities 10
-            , animateText = Juice.sine { start = 1, end = 1.2, duration = 120 }
+            { entities = textEntity :: squares
             , updates = 0
+            , behaviors =
+                Behavior "animateText" textEntity.id (Juice.sine { start = 1, end = 1.2, duration = 120 }) updateScale
+                    :: List.map (\s -> Behavior "moveSquare" s.id (\_ -> 1) moveRight)
+                        squares
             }
     in
     ( initialModel, initPort initialModel.entities )
 
 
-updateEntity : Delta -> (Int -> Float) -> Int -> Entity -> Entity
-updateEntity delta getScale updates entity =
-    if isGraphicsEntity entity then
-        { entity | x = entity.x + delta / 10 }
+moveRight : (Int -> Float) -> Int -> Delta -> Entity -> Entity
+moveRight getX updates delta entity =
+    { entity | x = entity.x + getX updates * delta / 15 }
 
-    else
-        { entity | scale = getScale updates }
+
+updateScale : (Int -> Float) -> Int -> Delta -> Entity -> Entity
+updateScale getScale updates _ entity =
+    { entity | scale = getScale updates }
 
 
 resetEntity : Entity -> Entity
@@ -82,6 +104,16 @@ resetEntity entity =
 
 isGraphicsEntity entity =
     entity.pixiType == "Graphics"
+
+
+runBehavior : Int -> Float -> List Entity -> Behavior -> Entity
+runBehavior updates delta entities behavior =
+    behavior.onUpdate behavior.transformation updates delta (getEntityById behavior.entityId entities)
+
+
+getEntityById : String -> List Entity -> Entity
+getEntityById id =
+    List.filter (\e -> e.id == id) >> List.head >> Maybe.withDefault emptyEntity
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -106,7 +138,8 @@ update msg lastModel =
 
                 Tick delta ->
                     { lastModel
-                        | entities = lastModel.entities |> List.map (updateEntity delta lastModel.animateText lastModel.updates)
+                      -- | entities = lastModel.entities |> List.map (updateEntity delta lastModel.animateText lastModel.updates)
+                        | entities = lastModel.behaviors |> List.map (runBehavior lastModel.updates delta lastModel.entities)
                         , updates = lastModel.updates + 1
                     }
     in
