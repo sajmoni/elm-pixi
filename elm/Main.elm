@@ -1,8 +1,11 @@
 port module Main exposing (init)
 
+import Behavior exposing (Behavior, run)
 import Browser.Events
+import Entity exposing (Entity)
 import Juice
 import Platform
+import Shared exposing (Delta)
 import Time
 
 
@@ -10,22 +13,6 @@ import Time
 -- type PixiDisplayObject
 --     = Graphics
 --     | Text
-
-
-type alias Behavior =
-    { id : String
-    , entityId : String
-    , transformation : Int -> Float
-    , onUpdate : (Int -> Float) -> Int -> Delta -> Entity -> Entity
-    }
-
-
-type alias Entity =
-    { id : String, x : Float, y : Float, pixiType : String, scale : Float }
-
-
-emptyEntity =
-    Entity "incorrectId" 0 0 "NoPixiType" 1
 
 
 type alias Model =
@@ -50,10 +37,6 @@ port updatePort : List Entity -> Cmd msg
 
 
 port initPort : List Entity -> Cmd msg
-
-
-type alias Delta =
-    Float
 
 
 type Msg
@@ -106,16 +89,6 @@ isGraphicsEntity entity =
     entity.pixiType == "Graphics"
 
 
-runBehavior : Int -> Float -> List Entity -> Behavior -> Entity
-runBehavior updates delta entities behavior =
-    behavior.onUpdate behavior.transformation updates delta (getEntityById behavior.entityId entities)
-
-
-getEntityById : String -> List Entity -> Entity
-getEntityById id =
-    List.filter (\e -> e.id == id) >> List.head >> Maybe.withDefault emptyEntity
-
-
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg lastModel =
     let
@@ -138,7 +111,7 @@ update msg lastModel =
                 Tick delta ->
                     { lastModel
                       -- | entities = lastModel.entities |> List.map (updateEntity delta lastModel.animateText lastModel.updates)
-                        | entities = lastModel.behaviors |> List.map (runBehavior lastModel.updates delta lastModel.entities)
+                        | entities = lastModel.behaviors |> List.map (run lastModel.updates delta lastModel.entities)
                         , updates = lastModel.updates + 1
                     }
     in
