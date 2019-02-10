@@ -44,7 +44,7 @@ const init = () => {
     model
       .filter(e => e.pixiType === 'Text')
       .forEach(({ id, x, y }) => {
-        const style = new PIXI.TextStyle({ fill: 'white' });
+        const style = new PIXI.TextStyle({ fill: 'white', fontSize: 48 });
         const text = new PIXI.Text('Elm Roguelike', style);
         text.anchor.set(0.5);
         text.x = x;

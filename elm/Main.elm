@@ -70,7 +70,7 @@ init : flags -> ( Model, Cmd msg )
 init _ =
     let
         textEntity =
-            Entity "titleText" 200 300 "Text" 1
+            Entity "titleText" 300 300 "Text" 1
 
         squares =
             getInitialEntities 10
@@ -125,10 +125,9 @@ update msg lastModel =
                     { lastModel
                         | entities =
                             lastModel.entities
-                                |> List.filter isGraphicsEntity
                                 |> List.map
                                     (\entity ->
-                                        if entity.id == idToUpdate then
+                                        if isGraphicsEntity entity && entity.id == idToUpdate then
                                             resetEntity entity
 
                                         else
