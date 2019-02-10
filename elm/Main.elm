@@ -1,12 +1,19 @@
 port module Main exposing (init)
 
 import Browser.Events
+import Juice
 import Platform
 import Time
 
 
+
+-- type PixiDisplayObject
+--     = Graphics
+--     | Text
+
+
 type alias Entity =
-    { id : String, x : Float, y : Float }
+    { id : String, x : Float, y : Float, pixiType : String }
 
 
 type alias Model =
@@ -42,14 +49,14 @@ type Msg
 
 getInitialEntities : Int -> List Entity
 getInitialEntities times =
-    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)))
+    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)) "Graphics")
 
 
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
         initialModel =
-            { entities = getInitialEntities 10 }
+            { entities = Entity "titleText" 10 100 "Text" :: getInitialEntities 10 }
     in
     ( initialModel, initPort initialModel )
 
@@ -64,6 +71,10 @@ resetEntity entity =
     { entity | x = 50 }
 
 
+isGraphicsEntity entity =
+    entity.pixiType == "Graphics"
+
+
 update : Msg -> Model -> ( Model, Cmd msg )
 update msg lastModel =
     let
@@ -72,19 +83,20 @@ update msg lastModel =
                 UpdateSquare idToUpdate ->
                     { lastModel
                         | entities =
-                            List.map
-                                (\entity ->
-                                    if entity.id == idToUpdate then
-                                        resetEntity entity
+                            lastModel.entities
+                                |> List.filter isGraphicsEntity
+                                |> List.map
+                                    (\entity ->
+                                        if entity.id == idToUpdate then
+                                            resetEntity entity
 
-                                    else
-                                        entity
-                                )
-                                lastModel.entities
+                                        else
+                                            entity
+                                    )
                     }
 
                 Tick delta ->
-                    { lastModel | entities = List.map (updateEntity delta) lastModel.entities }
+                    { lastModel | entities = lastModel.entities |> List.filter isGraphicsEntity |> List.map (updateEntity delta) }
     in
     ( newModel, updatePort newModel )
 

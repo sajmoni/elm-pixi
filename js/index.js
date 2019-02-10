@@ -26,27 +26,44 @@ const init = () => {
   };
 
   elmApp.ports.initPort.subscribe((model) => {
-    model.entities.forEach(({ id }) => {
-      const graphics = new PIXI.Graphics();
-      graphics.interactive = true;
-      graphics.on('mousedown', () => {
-        updateSquare(id);
+    model
+      .entities
+      .filter(e => e.pixiType === 'Graphics')
+      .forEach(({ id }) => {
+        const graphics = new PIXI.Graphics();
+        graphics.interactive = true;
+        graphics.on('mousedown', () => {
+          updateSquare(id);
+        });
+
+        app.stage.addChild(graphics);
+
+        entity[id] = graphics;
       });
 
-      app.stage.addChild(graphics);
+    model
+      .entities
+      .filter(e => e.pixiType === 'Text')
+      .forEach((e) => {
+        const text = new PIXI.Text('Elm Roguelike');
 
-      entity[id] = graphics;
-    });
+        app.stage.addChild(text);
+      });
   });
 
   elmApp.ports.updatePort.subscribe((model) => {
-    model.entities.forEach(({ id, x, y }) => {
-      entity[id]
-        .clear()
-        .beginFill(0xffffff)
-        .drawRect(x, y, 100, 100)
-        .endFill();
-    });
+    model
+      .entities
+      .forEach(({
+        id, x, y, scale = 1,
+      }) => {
+        entity[id]
+          .clear()
+          .beginFill(0xffffff)
+          .drawRect(x, y, 100, 100)
+          .endFill()
+          .scale.set(scale);
+      });
   });
 };
 
