@@ -39,14 +39,21 @@ type Msg
     | Tick Delta
 
 
+getInitialModel : Int -> List Entity
+getInitialModel times =
+    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)))
+
+
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
         initialModel =
-            [ Entity "square1" 50 50
-            , Entity "square2" 150 150
-            , Entity "square3" 250 250
-            ]
+            getInitialModel 10
+
+        -- [ Entity "square1" 50 50
+        -- , Entity "square2" 150 150
+        -- , Entity "square3" 250 250
+        -- ]
     in
     ( initialModel, initPort initialModel )
 
