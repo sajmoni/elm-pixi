@@ -26,7 +26,7 @@ const init = () => {
   };
 
   elmApp.ports.initPort.subscribe((model) => {
-    model.forEach(({ id }) => {
+    model.entities.forEach(({ id }) => {
       const graphics = new PIXI.Graphics();
       graphics.interactive = true;
       graphics.on('mousedown', () => {
@@ -40,7 +40,7 @@ const init = () => {
   });
 
   elmApp.ports.updatePort.subscribe((model) => {
-    model.forEach(({ id, x, y }) => {
+    model.entities.forEach(({ id, x, y }) => {
       entity[id]
         .clear()
         .beginFill(0xffffff)

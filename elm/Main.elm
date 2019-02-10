@@ -10,7 +10,8 @@ type alias Entity =
 
 
 type alias Model =
-    List Entity
+    { entities : List Entity
+    }
 
 
 
@@ -39,8 +40,8 @@ type Msg
     | Tick Delta
 
 
-getInitialModel : Int -> List Entity
-getInitialModel times =
+getInitialEntities : Int -> List Entity
+getInitialEntities times =
     List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)))
 
 
@@ -48,7 +49,7 @@ init : flags -> ( Model, Cmd msg )
 init _ =
     let
         initialModel =
-            getInitialModel 10
+            { entities = getInitialEntities 10 }
     in
     ( initialModel, initPort initialModel )
 
@@ -69,18 +70,21 @@ update msg lastModel =
         newModel =
             case msg of
                 UpdateSquare idToUpdate ->
-                    List.map
-                        (\entity ->
-                            if entity.id == idToUpdate then
-                                resetEntity entity
+                    { lastModel
+                        | entities =
+                            List.map
+                                (\entity ->
+                                    if entity.id == idToUpdate then
+                                        resetEntity entity
 
-                            else
-                                entity
-                        )
-                        lastModel
+                                    else
+                                        entity
+                                )
+                                lastModel.entities
+                    }
 
                 Tick delta ->
-                    List.map (updateEntity delta) lastModel
+                    { lastModel | entities = List.map (updateEntity delta) lastModel.entities }
     in
     ( newModel, updatePort newModel )
 
