@@ -10,19 +10,19 @@
     "start": "http-server -p 8080"
   },
   "dependencies": {
-    "elm": "0.19.0-bugfix2",
+    "elm": "0.19.0-bugfix6",
     "pixi.js": "4.8.5"
   },
   "devDependencies": {
     "@babel/core": "7.2.2",
-    "@babel/preset-env": "7.2.3",
+    "@babel/preset-env": "7.3.1",
     "babelify": "10.0.0",
     "browserify": "16.2.3",
-    "eslint": "5.12.0",
+    "eslint": "5.13.0",
     "eslint-config-airbnb-base": "13.1.0",
-    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-import": "2.16.0",
     "http-server": "0.11.1",
-    "prettier": "1.15.3",
+    "prettier": "1.16.4",
     "watchify": "3.11.0"
   }
 }
