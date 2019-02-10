@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import makeGetTexture from './util/getTexture';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 // settings.RESOLUTION = window.devicePixelRatio
@@ -12,34 +13,52 @@ const app = new PIXI.Application({
 
 document.getElementById('game').appendChild(app.view);
 
-// app.loader.add('assets/spritesheet.json')
+app.loader.add('spritesheet/food.json');
 
-const entity = {};
+const getTexture = makeGetTexture(app);
+
+const entityMap = {};
+
+const add = (id, entity) => {
+  app.stage.addChild(entity);
+
+  entityMap[id] = entity;
+};
 
 const init = () => {
-  const elmApp = Elm.Main.init({
+  const {
+    ports: {
+      initPort,
+      incomingPort,
+      updatePort,
+    },
+  } = Elm.Main.init({
     node: document.getElementById('elm'),
   });
 
-  const updateSquare = (id) => {
-    elmApp.ports.incomingPort.send(id);
-  };
-
-  elmApp.ports.initPort.subscribe((model) => {
+  initPort.subscribe((model) => {
     console.log({ model });
     model
       .filter(e => e.pixiType === 'Graphics')
       .forEach(({ id }) => {
-        const graphics = new PIXI.Graphics();
-        graphics.interactive = true;
-        graphics.on('mousedown', () => {
-          updateSquare(id);
+        const food = new PIXI.Sprite(getTexture('Food_24'));
+        food.interactive = true;
+        food.on('mousedown', () => {
+          incomingPort.send(id);
         });
-
-        app.stage.addChild(graphics);
-
-        entity[id] = graphics;
+        add(id, food);
       });
+    // .forEach(({ id }) => {
+    //   const graphics = new PIXI.Graphics();
+    //   graphics.interactive = true;
+    //   graphics.on('mousedown', () => {
+    //     updateSquare(id);
+    //   });
+
+    //   app.stage.addChild(graphics);
+
+    //   entity[id] = graphics;
+    // });
 
     model
       .filter(e => e.pixiType === 'Text')
@@ -49,29 +68,35 @@ const init = () => {
         text.anchor.set(0.5);
         text.x = x;
         text.y = y;
-        app.stage.addChild(text);
-
-        entity[id] = text;
+        add(id, text);
       });
   });
 
-  elmApp.ports.updatePort.subscribe((model) => {
+  updatePort.subscribe((model) => {
     model
       .filter(e => e.pixiType === 'Graphics')
       .forEach(({
         id, x, y, scale = 1,
       }) => {
-        entity[id]
-          .clear()
-          .beginFill(0xffffff)
-          .drawRect(x, y, 100, 100)
-          .endFill()
-          .scale.set(scale);
+        const e = entityMap[id];
+        e.x = x;
+        e.y = y;
+        e.scale.set(scale);
       });
+    // .forEach(({
+    //   id, x, y, scale = 1,
+    // }) => {
+    //   entity[id]
+    //     .clear()
+    //     .beginFill(0xffffff)
+    //     .drawRect(x, y, 100, 100)
+    //     .endFill()
+    //     .scale.set(scale);
+    // });
     model
       .filter(e => e.pixiType === 'Text')
       .forEach(({ id, scale }) => {
-        entity[id].scale.set(scale);
+        entityMap[id].scale.set(scale);
       });
   });
 };

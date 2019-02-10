@@ -8,6 +8,10 @@
 module Juice exposing (sine)
 
 
+type alias Update =
+    Int -> Float
+
+
 sine : { start : Float, end : Float, duration : Int } -> Int -> Float
 sine { start, end, duration } time =
     let

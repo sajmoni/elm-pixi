@@ -46,7 +46,7 @@ type Msg
 
 getInitialEntities : Int -> List Entity
 getInitialEntities times =
-    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)) "Graphics" 1)
+    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)) "Graphics" 3)
 
 
 init : flags -> ( Model, Cmd msg )
