@@ -26,8 +26,8 @@ const init = () => {
   };
 
   elmApp.ports.initPort.subscribe((model) => {
+    console.log({ model });
     model
-      .entities
       .filter(e => e.pixiType === 'Graphics')
       .forEach(({ id }) => {
         const graphics = new PIXI.Graphics();
@@ -42,18 +42,22 @@ const init = () => {
       });
 
     model
-      .entities
       .filter(e => e.pixiType === 'Text')
-      .forEach((e) => {
-        const text = new PIXI.Text('Elm Roguelike');
-
+      .forEach(({ id, x, y }) => {
+        const style = new PIXI.TextStyle({ fill: 'white' });
+        const text = new PIXI.Text('Elm Roguelike', style);
+        text.anchor.set(0.5);
+        text.x = x;
+        text.y = y;
         app.stage.addChild(text);
+
+        entity[id] = text;
       });
   });
 
   elmApp.ports.updatePort.subscribe((model) => {
     model
-      .entities
+      .filter(e => e.pixiType === 'Graphics')
       .forEach(({
         id, x, y, scale = 1,
       }) => {
@@ -63,6 +67,11 @@ const init = () => {
           .drawRect(x, y, 100, 100)
           .endFill()
           .scale.set(scale);
+      });
+    model
+      .filter(e => e.pixiType === 'Text')
+      .forEach(({ id, scale }) => {
+        entity[id].scale.set(scale);
       });
   });
 };

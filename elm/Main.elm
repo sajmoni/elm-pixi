@@ -13,11 +13,13 @@ import Time
 
 
 type alias Entity =
-    { id : String, x : Float, y : Float, pixiType : String }
+    { id : String, x : Float, y : Float, pixiType : String, scale : Float }
 
 
 type alias Model =
     { entities : List Entity
+    , animateText : Int -> Float
+    , updates : Int
     }
 
 
@@ -32,10 +34,10 @@ port incomingPort : (String -> msg) -> Sub msg
 -- Outgoing subscriptions
 
 
-port updatePort : Model -> Cmd msg
+port updatePort : List Entity -> Cmd msg
 
 
-port initPort : Model -> Cmd msg
+port initPort : List Entity -> Cmd msg
 
 
 type alias Delta =
@@ -49,21 +51,28 @@ type Msg
 
 getInitialEntities : Int -> List Entity
 getInitialEntities times =
-    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)) "Graphics")
+    List.range 1 times |> List.map (\n -> Entity ("square" ++ String.fromInt n) (toFloat n / 2) (toFloat (n + modBy n 5)) "Graphics" 1)
 
 
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
         initialModel =
-            { entities = Entity "titleText" 10 100 "Text" :: getInitialEntities 10 }
+            { entities = Entity "titleText" 200 300 "Text" 1 :: getInitialEntities 10
+            , animateText = Juice.sine { start = 1, end = 1.2, duration = 120 }
+            , updates = 0
+            }
     in
-    ( initialModel, initPort initialModel )
+    ( initialModel, initPort initialModel.entities )
 
 
-updateEntity : Delta -> Entity -> Entity
-updateEntity delta entity =
-    { entity | x = entity.x + delta / 10 }
+updateEntity : Delta -> (Int -> Float) -> Int -> Entity -> Entity
+updateEntity delta getScale updates entity =
+    if isGraphicsEntity entity then
+        { entity | x = entity.x + delta / 10 }
+
+    else
+        { entity | scale = getScale updates }
 
 
 resetEntity : Entity -> Entity
@@ -96,9 +105,12 @@ update msg lastModel =
                     }
 
                 Tick delta ->
-                    { lastModel | entities = lastModel.entities |> List.filter isGraphicsEntity |> List.map (updateEntity delta) }
+                    { lastModel
+                        | entities = lastModel.entities |> List.map (updateEntity delta lastModel.animateText lastModel.updates)
+                        , updates = lastModel.updates + 1
+                    }
     in
-    ( newModel, updatePort newModel )
+    ( newModel, updatePort newModel.entities )
 
 
 subscriptions : Model -> Sub Msg
