@@ -17,7 +17,7 @@ type alias Model =
 -- Incoming actions
 
 
-port updateSquare : (String -> msg) -> Sub msg
+port incomingPort : (String -> msg) -> Sub msg
 
 
 
@@ -49,11 +49,6 @@ init _ =
     let
         initialModel =
             getInitialModel 10
-
-        -- [ Entity "square1" 50 50
-        -- , Entity "square2" 150 150
-        -- , Entity "square3" 250 250
-        -- ]
     in
     ( initialModel, initPort initialModel )
 
@@ -92,7 +87,7 @@ update msg lastModel =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [ updateSquare UpdateSquare, Browser.Events.onAnimationFrameDelta Tick ]
+    Sub.batch [ incomingPort UpdateSquare, Browser.Events.onAnimationFrameDelta Tick ]
 
 
 main : Program () Model Msg
