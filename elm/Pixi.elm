@@ -1,4 +1,4 @@
-module Pixi exposing (AnimationSpeed, BasicInformation, Entity(..), Id, Scale, TextString, TextStyle, Texture, Textures, X, Y, animatedSprite, animatedSpriteType, graphicsType, sprite, spriteType, textType)
+module Pixi exposing (AnimationSpeed, BasicInformation, Entity(..), Id, Scale, TextString, TextStyle, Texture, Textures, X, Y, animatedSprite, animatedSpriteType, graphicsType, spriteType, text, textType)
 
 
 animatedSpriteType =
@@ -49,7 +49,7 @@ type alias BasicInformation =
     { id : String
     , x : Float
     , y : Float
-    , scale : Float
+    , scale : Maybe Float
     }
 
 
@@ -57,11 +57,25 @@ type alias TextString =
     String
 
 
+type alias AnimatedSpriteData basicInformation =
+    { basicInformation
+        | textures : List String
+        , animationSpeed : Maybe Float
+    }
+
+
+type alias TextData basicInformation =
+    { basicInformation
+        | textString : String
+        , textStyle : TextStyle
+    }
+
+
 type Entity
     = Sprite BasicInformation Texture
-    | AnimatedSprite BasicInformation Textures AnimationSpeed
+    | AnimatedSprite (AnimatedSpriteData BasicInformation)
     | Graphics BasicInformation
-    | Text BasicInformation TextString TextStyle
+    | Text (TextData BasicInformation)
 
 
 type alias TextStyle =
@@ -92,24 +106,37 @@ type alias TextStyle =
 --     { a
 --         | texture : String
 --     }
+-- sprite : { id : String, x : Float, y : Float, scale : Maybe Float, texture : String } -> Entity
+-- sprite { id, x, y, scale, texture } =
+--     let
+--         basicInformation =
+--             BasicInformation id x y (Maybe.withDefault 1 scale)
+--     in
+--     Sprite basicInformation texture
 
 
-sprite : { id : String, x : Float, y : Float, scale : Maybe Float, texture : String } -> Entity
-sprite { id, x, y, scale, texture } =
-    let
-        basicInformation =
-            BasicInformation id x y (Maybe.withDefault 1 scale)
-    in
-    Sprite basicInformation texture
-
-
-animatedSprite : { id : String, x : Float, y : Float, scale : Maybe Float, textures : List String, animationSpeed : Maybe Float } -> Entity
+animatedSprite : AnimatedSpriteData BasicInformation -> Entity
 animatedSprite { id, x, y, scale, textures, animationSpeed } =
-    let
-        basicInformation =
-            BasicInformation id x y (Maybe.withDefault 1 scale)
-    in
-    AnimatedSprite basicInformation textures (Maybe.withDefault 0.05 animationSpeed)
+    AnimatedSprite
+        { id = id
+        , x = x
+        , y = y
+        , scale = scale
+        , textures = textures
+        , animationSpeed = animationSpeed
+        }
+
+
+text : TextData BasicInformation -> Entity
+text { id, x, y, scale, textString, textStyle } =
+    Text
+        { id = id
+        , x = x
+        , y = y
+        , scale = scale
+        , textString = textString
+        , textStyle = textStyle
+        }
 
 
 

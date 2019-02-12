@@ -17,7 +17,8 @@ export default (update, entityMap, addEntity, getTexture) => {
       });
 
     model
-      .filter(e => e.type === 'Text' || e.type === 'AnimatedType')
+      .filter(e => entityMap[e.id])
+      .filter(e => e.type === 'Text' || e.type === 'AnimatedSprite')
       .forEach(({
         id, x, y, scale,
       }) => {
@@ -46,7 +47,20 @@ export default (update, entityMap, addEntity, getTexture) => {
               animatedSprite.animationSpeed = animationSpeed;
 
               addEntity(id, animatedSprite);
+            } else if (e.type === 'Text') {
+              const {
+                id, x, y, scale, text: textString,
+              } = e;
+              const style = new PIXI.TextStyle({ fill: 'white', fontSize: 24 });
+              const text = new PIXI.Text(textString, style);
+              text.anchor.set(0.5);
+              text.x = x;
+              text.y = y;
+              text.scale.set(scale);
+              addEntity(id, text);
             }
+            // console.log({ newS: e });
+            // console.log({ em: entityMap });
           });
       });
   });

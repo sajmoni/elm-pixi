@@ -27,6 +27,7 @@ type Msg
 initialSceneEntities : List Entity
 initialSceneEntities =
     [ Pixi.animatedSprite { id = "test1", x = 45, y = 45, scale = Just 3, textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
+    , Pixi.text { id = "text1", x = 145, y = 145, scale = Just 3, textString = "ElmQuest", textStyle = { fill = "white", fontSize = 42 } }
     ]
 
 
@@ -77,9 +78,6 @@ init _ =
 --         _ ->
 --             Debug.todo "Handle this"
 -- { entity | x = entity.x + getX updates * delta / 15 }
--- updateScale : (Int -> Float) -> Int -> Delta -> Entity -> Entity
--- updateScale getScale updates _ entity =
---     { entity | scale = getScale updates }
 -- resetEntity : Entity -> Entity
 -- resetEntity entity =
 --     { entity | x = 50 }
@@ -109,13 +107,53 @@ init _ =
 --     }
 
 
-updateEntities : List Entity -> List Behavior -> List Entity
-updateEntities entities behaviors =
-    entities
+updateEntities : Delta -> Int -> List Entity -> List Behavior -> List Entity
+updateEntities delta updates entities behaviors =
+    List.map (moveRight delta updates >> updateScale delta updates) entities
 
 
 
 -- behaviors |> List.foldl runner entities
+
+
+moveRight : Delta -> Int -> Entity -> Entity
+moveRight delta updates entity =
+    case entity of
+        AnimatedSprite data ->
+            -- let
+            --     _ =
+            --         Debug.log "fsdfdsfsf" data.x
+            -- in
+            Pixi.animatedSprite { data | x = data.x + 10 / delta }
+
+        Text data ->
+            entity
+
+        _ ->
+            Debug.todo "Blah!"
+
+
+
+-- updateScale : (Int -> Float) -> Int -> Delta -> Entity -> Entity
+-- updateScale getScale updates _ entity =
+--     { entity | scale = getScale updates }
+
+
+getScale =
+    Juice.sine { start = 1, end = 1.2, duration = 120 }
+
+
+updateScale : Delta -> Int -> Entity -> Entity
+updateScale delta updates entity =
+    case entity of
+        AnimatedSprite data ->
+            entity
+
+        Text data ->
+            Pixi.text { data | scale = Just (getScale updates) }
+
+        _ ->
+            Debug.todo "Blah!"
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -138,7 +176,7 @@ update msg lastModel =
                 Tick delta ->
                     { lastModel
                         | updates = lastModel.updates + 1
-                        , entities = updateEntities lastModel.entities lastModel.behaviors
+                        , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
                     }
 
                 _ ->
