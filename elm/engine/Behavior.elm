@@ -1,6 +1,6 @@
-module Behavior exposing (Behavior, run)
+module Behavior exposing (Behavior)
 
-import Entity exposing (..)
+import Pixi exposing (..)
 import Shared exposing (Delta)
 
 
@@ -10,12 +10,7 @@ import Shared exposing (Delta)
 
 type alias Behavior =
     { id : String
-    , entityId : String
+    , entity : Entity
     , transformation : Int -> Float
     , onUpdate : (Int -> Float) -> Int -> Delta -> Entity -> Entity
     }
-
-
-run : Int -> Float -> List Entity -> Behavior -> Entity
-run updates delta entities behavior =
-    behavior.onUpdate behavior.transformation updates delta (getById behavior.entityId entities)
