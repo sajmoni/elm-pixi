@@ -1,6 +1,7 @@
 module Main exposing (init)
 
-import Behavior exposing (Behavior)
+-- import Behavior exposing (Behavior)
+
 import Browser.Events
 import Encode exposing (..)
 import Json.Encode exposing (..)
@@ -10,6 +11,10 @@ import Platform
 import Port
 import Shared exposing (Delta)
 import Time
+
+
+type alias Behavior =
+    Delta -> Int -> Entity -> Entity
 
 
 type alias Model =
@@ -31,23 +36,6 @@ initialSceneEntities =
     ]
 
 
-
--- makeMoveRight : Entity -> Behavior
--- makeMoveRight entity =
---     Behavior "moveSquare" entity (\_ -> 1) moveRight
--- makeMoveRight entity =
---     case entity of
---         AnimatedSprite bi _ _ ->
---             -- Behavior "moveSquare" bi.id (\_ -> 1) moveRight
---             Behavior "moveSquare" bi.id (\_ -> 1) moveRight
---         _ ->
---             Debug.todo "Fix this!"
--- initialSceneBehaviors : List Entity -> List Behavior
--- initialSceneBehaviors entities =
---     -- Behavior "animateText" "titleText" (Juice.sine { start = 1, end = 1.2, duration = 120 }) updateScale
---     List.map makeMoveRight entities
-
-
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
@@ -55,7 +43,9 @@ init _ =
             initialSceneEntities
 
         behaviors =
-            []
+            [ moveRight
+            , updateScale
+            ]
 
         initialModel =
             { updates = 0
@@ -109,21 +99,19 @@ init _ =
 
 updateEntities : Delta -> Int -> List Entity -> List Behavior -> List Entity
 updateEntities delta updates entities behaviors =
-    List.map (moveRight delta updates >> updateScale delta updates) entities
+    behaviors
+        |> List.foldl (runUpdates delta updates) entities
 
 
+runUpdates : Delta -> Int -> Behavior -> List Entity -> List Entity
+runUpdates delta updates updater entities =
+    List.map (updater delta updates) entities
 
--- behaviors |> List.foldl runner entities
 
-
-moveRight : Delta -> Int -> Entity -> Entity
+moveRight : Behavior
 moveRight delta updates entity =
     case entity of
         AnimatedSprite data ->
-            -- let
-            --     _ =
-            --         Debug.log "fsdfdsfsf" data.x
-            -- in
             Pixi.animatedSprite { data | x = data.x + 10 / delta }
 
         Text data ->
@@ -143,7 +131,7 @@ getScale =
     Juice.sine { start = 1, end = 1.2, duration = 120 }
 
 
-updateScale : Delta -> Int -> Entity -> Entity
+updateScale : Behavior
 updateScale delta updates entity =
     case entity of
         AnimatedSprite data ->
