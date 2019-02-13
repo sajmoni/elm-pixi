@@ -1,7 +1,7 @@
 module Encode exposing (encodeEntities, encodeEntity)
 
 import Json.Encode exposing (..)
-import Pixi exposing (Entity(..))
+import Pixi exposing (..)
 
 
 encodeEntities : List Entity -> Value
@@ -12,26 +12,26 @@ encodeEntities =
 encodeEntity : Entity -> Value
 encodeEntity entity =
     case entity of
-        Text data ->
+        Text basicInformation textData ->
             object
-                [ ( "id", string data.id )
-                , ( "x", float data.x )
-                , ( "y", float data.y )
-                , ( "scale", float (Maybe.withDefault 1 data.scale) )
-                , ( "text", string data.textString )
+                [ ( "id", string basicInformation.id )
+                , ( "x", float basicInformation.x )
+                , ( "y", float basicInformation.y )
+                , ( "scale", float (Maybe.withDefault 1 basicInformation.scale) )
+                , ( "text", string textData.textString )
 
                 -- , ( "textStyle", float (Maybe.withDefault 0.05 data.animationSpeed) )
                 , ( "type", string "Text" )
                 ]
 
-        AnimatedSprite data ->
+        AnimatedSprite basicInformation textData ->
             object
-                [ ( "id", string data.id )
-                , ( "x", float data.x )
-                , ( "y", float data.y )
-                , ( "scale", float (Maybe.withDefault 1 data.scale) )
-                , ( "textures", list string data.textures )
-                , ( "animationSpeed", float (Maybe.withDefault 0.05 data.animationSpeed) )
+                [ ( "id", string basicInformation.id )
+                , ( "x", float basicInformation.x )
+                , ( "y", float basicInformation.y )
+                , ( "scale", float (Maybe.withDefault 1 basicInformation.scale) )
+                , ( "textures", list string textData.textures )
+                , ( "animationSpeed", float (Maybe.withDefault 0.05 textData.animationSpeed) )
                 , ( "type", string "AnimatedSprite" )
                 ]
 

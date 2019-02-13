@@ -6,7 +6,7 @@ import Browser.Events
 import Encode exposing (..)
 import Json.Encode exposing (..)
 import Juice
-import Pixi exposing (Entity(..))
+import Pixi exposing (..)
 import Platform
 import Port
 import Shared exposing (Delta)
@@ -14,7 +14,7 @@ import Time
 
 
 type alias Behavior =
-    Delta -> Int -> Entity -> Entity
+    Delta -> Int -> BasicInformation -> BasicInformation
 
 
 type alias Model =
@@ -31,8 +31,8 @@ type Msg
 
 initialSceneEntities : List Entity
 initialSceneEntities =
-    [ Pixi.animatedSprite { id = "test1", x = 45, y = 45, scale = Just 3, textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
-    , Pixi.text { id = "text1", x = 145, y = 145, scale = Just 3, textString = "ElmQuest", textStyle = { fill = "white", fontSize = 42 } }
+    [ animatedSprite { id = "monster1", x = 45, y = 45, scale = Just 3 } { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
+    , text { id = "text1", x = 145, y = 145, scale = Just 3 } { textString = "ElmQuest", textStyle = { fill = "white", fontSize = 42 } }
     ]
 
 
@@ -105,23 +105,19 @@ updateEntities delta updates entities behaviors =
 
 runUpdates : Delta -> Int -> Behavior -> List Entity -> List Entity
 runUpdates delta updates updater entities =
-    List.map (updater delta updates) entities
-
-
-moveRight : Behavior
-moveRight delta updates entity =
-    case entity of
-        AnimatedSprite data ->
-            Pixi.animatedSprite { data | x = data.x + 10 / delta }
-
-        Text data ->
-            entity
-
-        _ ->
-            Debug.todo "Blah!"
+    List.map (updateEntityOfAnyType delta updates updater) entities
 
 
 
+-- moveRight : Behavior
+-- moveRight delta updates entity =
+--     case entity of
+--         AnimatedSprite data ->
+--             Pixi.animatedSprite { data | x = data.x + 10 / delta }
+--         Text data ->
+--             entity
+--         _ ->
+--             Debug.todo "Blah!"
 -- updateScale : (Int -> Float) -> Int -> Delta -> Entity -> Entity
 -- updateScale getScale updates _ entity =
 --     { entity | scale = getScale updates }
@@ -131,14 +127,36 @@ getScale =
     Juice.sine { start = 1, end = 1.2, duration = 120 }
 
 
-updateScale : Behavior
-updateScale delta updates entity =
-    case entity of
-        AnimatedSprite data ->
-            entity
 
-        Text data ->
-            Pixi.text { data | scale = Just (getScale updates) }
+-- updateScale : Behavior
+-- updateScale delta updates entity =
+-- case entity of
+--     AnimatedSprite data ->
+--         entity
+--     Text data ->
+--         Pixi.text { data | scale = Just (getScale updates) }
+--     _ ->
+--         Debug.todo "Blah!"
+
+
+updateScale : Behavior
+updateScale delta updates data =
+    { data | scale = Just (getScale updates) }
+
+
+moveRight : Behavior
+moveRight delta updates data =
+    { data | x = data.x + 10 / delta }
+
+
+updateEntityOfAnyType : Delta -> Int -> Behavior -> Entity -> Entity
+updateEntityOfAnyType delta updates updateFunction entity =
+    case entity of
+        AnimatedSprite basicInformation data ->
+            Pixi.animatedSprite (updateFunction delta updates basicInformation) (AnimatedSpriteData data.textures data.animationSpeed)
+
+        Text basicInformation data ->
+            Pixi.text (updateFunction delta updates basicInformation) (TextData data.textString data.textStyle)
 
         _ ->
             Debug.todo "Blah!"
@@ -169,11 +187,6 @@ update msg lastModel =
 
                 _ ->
                     lastModel
-
-        -- { lastModel
-        --     | entities = lastModel.behaviors |> List.map (run lastModel.updates delta lastModel.entities)
-        --     , updates = lastModel.updates + 1
-        -- }
     in
     ( newModel, Port.update (encodeEntities newModel.entities) )
 

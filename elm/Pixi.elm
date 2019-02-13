@@ -1,4 +1,4 @@
-module Pixi exposing (AnimationSpeed, BasicInformation, Entity(..), Id, Scale, TextString, TextStyle, Texture, Textures, X, Y, animatedSprite, animatedSpriteType, graphicsType, spriteType, text, textType)
+module Pixi exposing (AnimatedSpriteData, AnimationSpeed, BasicInformation, Entity(..), Id, Scale, TextData, TextString, TextStyle, Texture, Textures, X, Y, animatedSprite, animatedSpriteType, graphicsType, spriteType, text, textType)
 
 
 animatedSpriteType =
@@ -57,25 +57,23 @@ type alias TextString =
     String
 
 
-type alias AnimatedSpriteData basicInformation =
-    { basicInformation
-        | textures : List String
-        , animationSpeed : Maybe Float
+type alias AnimatedSpriteData =
+    { textures : List String
+    , animationSpeed : Maybe Float
     }
 
 
-type alias TextData basicInformation =
-    { basicInformation
-        | textString : String
-        , textStyle : TextStyle
+type alias TextData =
+    { textString : String
+    , textStyle : TextStyle
     }
 
 
 type Entity
     = Sprite BasicInformation Texture
-    | AnimatedSprite (AnimatedSpriteData BasicInformation)
+    | AnimatedSprite BasicInformation AnimatedSpriteData
     | Graphics BasicInformation
-    | Text (TextData BasicInformation)
+    | Text BasicInformation TextData
 
 
 type alias TextStyle =
@@ -115,26 +113,28 @@ type alias TextStyle =
 --     Sprite basicInformation texture
 
 
-animatedSprite : AnimatedSpriteData BasicInformation -> Entity
-animatedSprite { id, x, y, scale, textures, animationSpeed } =
+animatedSprite : BasicInformation -> AnimatedSpriteData -> Entity
+animatedSprite { id, x, y, scale } { textures, animationSpeed } =
     AnimatedSprite
         { id = id
         , x = x
         , y = y
         , scale = scale
-        , textures = textures
+        }
+        { textures = textures
         , animationSpeed = animationSpeed
         }
 
 
-text : TextData BasicInformation -> Entity
-text { id, x, y, scale, textString, textStyle } =
+text : BasicInformation -> TextData -> Entity
+text { id, x, y, scale } { textString, textStyle } =
     Text
         { id = id
         , x = x
         , y = y
         , scale = scale
-        , textString = textString
+        }
+        { textString = textString
         , textStyle = textStyle
         }
 
