@@ -156,24 +156,16 @@ handleInteraction id event interaction list =
 
 
 toTuples entities =
-    List.map foo entities
+    List.map makeEntityMsgTuple entities
 
 
-foo entity =
+makeEntityMsgTuple entity =
     ( entity, Noop )
 
 
 handleInteractions : String -> String -> List Entity -> List Interaction -> List ( Entity, Msg )
 handleInteractions id event entities interactions =
     interactions |> List.foldl (handleInteraction id event) (toTuples entities)
-
-
-
--- updateEntities : Delta -> Int -> List Entity -> List Behavior -> List Entity
--- updateEntities delta updates entities behaviors =
---     behaviors
---         |> List.foldl (runUpdates delta updates) entities
--- foo id event
 
 
 removeEntity : String -> Entity -> Bool
@@ -211,7 +203,6 @@ update msg lastModel =
                         updatedModel =
                             { lastModel | entities = List.map Tuple.first list }
                     in
-                    -- { lastModel | entities = List.filter (handleInteraction id event) lastModel.entities }
                     list |> List.map Tuple.second |> List.foldl (callUpdate update) updatedModel
 
                 RemoveEntity id ->
