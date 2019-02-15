@@ -19,11 +19,17 @@ type alias Interaction =
     String -> String -> BasicData -> ( BasicData, Msg )
 
 
+type AppState
+    = MainMenu
+    | Game
+
+
 type alias Model =
     { entities : List Entity
     , updates : Int
     , behaviors : List Behavior
     , interactions : List Interaction
+    , appState : AppState
     }
 
 
@@ -31,6 +37,7 @@ type Msg
     = Interaction InteractionData
     | RemoveEntity String
     | Noop
+    | ChangeAppState AppState
     | Tick Delta
 
 
@@ -61,6 +68,7 @@ init _ =
 
         interactions =
             [ resetX "monster1" "click"
+            , changeAppState "startButton" "click"
             ]
 
         initialModel =
@@ -68,6 +76,7 @@ init _ =
             , entities = entities
             , behaviors = behaviors
             , interactions = interactions
+            , appState = MainMenu
             }
     in
     ( initialModel, Port.init (encodeEntities initialModel.entities) )
@@ -150,6 +159,15 @@ resetX idToCheck eventToCheck id event data =
         ( data, Noop )
 
 
+changeAppState : String -> String -> Interaction
+changeAppState idToCheck eventToCheck id event data =
+    if eventToCheck == event && idToCheck == id && data.id == idToCheck then
+        ( data, ChangeAppState Game )
+
+    else
+        ( data, Noop )
+
+
 handleInteraction : String -> String -> Interaction -> List ( Entity, Msg ) -> List ( Entity, Msg )
 handleInteraction id event interaction list =
     List.map (applyInteractionToEntity id event interaction) (List.map Tuple.first list)
@@ -218,6 +236,15 @@ update msg lastModel =
 
                 Noop ->
                     lastModel
+
+                ChangeAppState appState ->
+                    let
+                        _ =
+                            Debug.log "appstate" appState
+                    in
+                    { lastModel
+                        | appState = appState
+                    }
 
                 Tick delta ->
                     { lastModel
