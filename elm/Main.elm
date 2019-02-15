@@ -16,7 +16,7 @@ type alias Behavior =
 
 
 type alias Interaction =
-    String -> String -> BasicData -> BasicData
+    String -> String -> BasicData -> ( BasicData, Msg )
 
 
 type alias Model =
@@ -29,6 +29,8 @@ type alias Model =
 
 type Msg
     = Interaction InteractionData
+    | RemoveEntity String
+    | Noop
     | Tick Delta
 
 
@@ -118,14 +120,22 @@ updateEntity delta updates behavior entity =
             Debug.todo "Blah!"
 
 
-applyInteractionToEntity : String -> String -> Interaction -> Entity -> Entity
+applyInteractionToEntity : String -> String -> Interaction -> Entity -> ( Entity, Msg )
 applyInteractionToEntity id event interaction entity =
     case entity of
         AnimatedSprite basicData animatedSpriteData ->
-            Pixi.animatedSprite (interaction id event basicData) (AnimatedSpriteData animatedSpriteData.textures animatedSpriteData.animationSpeed)
+            let
+                ( newBasicData, msg ) =
+                    interaction id event basicData
+            in
+            ( Pixi.animatedSprite newBasicData (AnimatedSpriteData animatedSpriteData.textures animatedSpriteData.animationSpeed), msg )
 
         Text basicData textData ->
-            Pixi.text (interaction id event basicData) (TextData textData.textString textData.textStyle)
+            let
+                ( newBasicData, msg ) =
+                    interaction id event basicData
+            in
+            ( Pixi.text newBasicData (TextData textData.textString textData.textStyle), msg )
 
         _ ->
             Debug.todo "Blah!"
@@ -133,21 +143,29 @@ applyInteractionToEntity id event interaction entity =
 
 resetX : String -> String -> Interaction
 resetX idToCheck eventToCheck id event data =
-    if eventToCheck == event && id == idToCheck && data.id == idToCheck then
-        { data | x = 0 }
+    if eventToCheck == event && idToCheck == id && data.id == idToCheck then
+        ( { data | x = 0 }, RemoveEntity idToCheck )
 
     else
-        data
+        ( data, Noop )
 
 
-handleInteraction : String -> String -> Interaction -> List Entity -> List Entity
-handleInteraction id event interaction entities =
-    List.map (applyInteractionToEntity id event interaction) entities
+handleInteraction : String -> String -> Interaction -> List ( Entity, Msg ) -> List ( Entity, Msg )
+handleInteraction id event interaction list =
+    List.map (applyInteractionToEntity id event interaction) (List.map Tuple.first list)
 
 
-handleInteractions : String -> String -> List Entity -> List Interaction -> List Entity
+toTuples entities =
+    List.map foo entities
+
+
+foo entity =
+    ( entity, Noop )
+
+
+handleInteractions : String -> String -> List Entity -> List Interaction -> List ( Entity, Msg )
 handleInteractions id event entities interactions =
-    interactions |> List.foldl (handleInteraction id event) entities
+    interactions |> List.foldl (handleInteraction id event) (toTuples entities)
 
 
 
@@ -158,23 +176,67 @@ handleInteractions id event entities interactions =
 -- foo id event
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+removeEntity : String -> Entity -> Bool
+removeEntity id entity =
+    let
+        basicData =
+            getBasicData entity
+
+        _ =
+            Debug.log "basicData" basicData.id
+    in
+    if basicData.id == id then
+        False
+
+    else
+        True
+
+
+callUpdate : (Msg -> Model -> ( Model, Cmd Msg )) -> Msg -> Model -> Model
+callUpdate updateFn msg prevModel =
+    let
+        ( model, _ ) =
+            updateFn msg prevModel
+    in
+    model
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
-        newModel =
+        ( newModel, commands ) =
             case msg of
                 Interaction { id, event } ->
+                    let
+                        list =
+                            handleInteractions id event lastModel.entities lastModel.interactions
+
+                        updatedModel =
+                            { lastModel | entities = List.map Tuple.first list }
+                    in
                     -- { lastModel | entities = List.filter (handleInteraction id event) lastModel.entities }
-                    { lastModel | entities = handleInteractions id event lastModel.entities lastModel.interactions }
+                    ( list |> List.map Tuple.second |> List.foldl (callUpdate update) updatedModel, Cmd.none )
+
+                RemoveEntity id ->
+                    let
+                        _ =
+                            Debug.log "id" id
+                    in
+                    ( { lastModel | entities = List.filter (removeEntity id) lastModel.entities }, Cmd.none )
+
+                Noop ->
+                    ( lastModel, Cmd.none )
 
                 Tick delta ->
-                    { lastModel
+                    ( { lastModel
                         | updates = lastModel.updates + 1
                         , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
-                    }
+                      }
+                    , Cmd.none
+                    )
     in
     ( newModel
-    , Port.update (encodeEntities newModel.entities)
+    , Cmd.batch [ Port.update (encodeEntities newModel.entities), commands ]
     )
 
 
