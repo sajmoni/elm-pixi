@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 import makeGetTexture from './util/getTexture';
 import handleUpdate from './handleUpdate';
-import handleInit from './handleInit';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 // settings.RESOLUTION = window.devicePixelRatio
@@ -24,16 +23,22 @@ const getTexture = makeGetTexture(app);
 const entityMap = {};
 
 const addEntity = (id, entity) => {
-  app.stage.addChild(entity);
-
   entityMap[id] = entity;
+  app.stage.addChild(entity);
+};
+
+const removeEntity = (id) => {
+  const entity = entityMap[id];
+  entity.parent.removeChild(entity);
+  entity.destroy({ children: true });
+  delete entityMap[id];
 };
 
 const init = () => {
   const {
     ports: {
       // init: initPort,
-      // incoming,
+      incoming,
       update,
     },
   } = Elm.Main.init({
@@ -42,7 +47,9 @@ const init = () => {
 
   // handleInit(initPort, addEntity, getTexture);
 
-  handleUpdate(update, entityMap, addEntity, getTexture);
+  handleUpdate({
+    update, entityMap, addEntity, getTexture, incoming, removeEntity,
+  });
 };
 
 app.loader.load(init);

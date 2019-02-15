@@ -1,14 +1,7 @@
--- export const sine = ({
---   start, end, duration,
--- }) => (t) => {
---   return
--- };
+module Juice exposing (Juicer, sine)
 
 
-module Juice exposing (sine)
-
-
-type alias Update =
+type alias Juicer =
     Int -> Float
 
 

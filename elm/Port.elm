@@ -1,14 +1,16 @@
 port module Port exposing (incoming, init, update)
 
+import Json.Decode
 import Json.Encode
 import Pixi exposing (..)
+import Shared exposing (InteractionData)
 
 
 
 -- Incoming actions
 
 
-port incoming : (String -> msg) -> Sub msg
+port incoming : (InteractionData -> msg) -> Sub msg
 
 
 
