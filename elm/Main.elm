@@ -181,9 +181,6 @@ removeEntity id entity =
     let
         basicData =
             getBasicData entity
-
-        _ =
-            Debug.log "basicData" basicData.id
     in
     if basicData.id == id then
         False
@@ -204,7 +201,7 @@ callUpdate updateFn msg prevModel =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
-        ( newModel, commands ) =
+        newModel =
             case msg of
                 Interaction { id, event } ->
                     let
@@ -215,28 +212,22 @@ update msg lastModel =
                             { lastModel | entities = List.map Tuple.first list }
                     in
                     -- { lastModel | entities = List.filter (handleInteraction id event) lastModel.entities }
-                    ( list |> List.map Tuple.second |> List.foldl (callUpdate update) updatedModel, Cmd.none )
+                    list |> List.map Tuple.second |> List.foldl (callUpdate update) updatedModel
 
                 RemoveEntity id ->
-                    let
-                        _ =
-                            Debug.log "id" id
-                    in
-                    ( { lastModel | entities = List.filter (removeEntity id) lastModel.entities }, Cmd.none )
+                    { lastModel | entities = List.filter (removeEntity id) lastModel.entities }
 
                 Noop ->
-                    ( lastModel, Cmd.none )
+                    lastModel
 
                 Tick delta ->
-                    ( { lastModel
+                    { lastModel
                         | updates = lastModel.updates + 1
                         , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
-                      }
-                    , Cmd.none
-                    )
+                    }
     in
     ( newModel
-    , Cmd.batch [ Port.update (encodeEntities newModel.entities), commands ]
+    , Cmd.batch [ Port.update (encodeEntities newModel.entities) ]
     )
 
 
