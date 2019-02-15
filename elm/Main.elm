@@ -16,15 +16,14 @@ type alias Behavior =
 
 
 type alias Interaction =
-    BasicData -> BasicData
+    String -> String -> BasicData -> BasicData
 
 
 type alias Model =
     { entities : List Entity
     , updates : Int
     , behaviors : List Behavior
-
-    -- , interactions : List Interaction
+    , interactions : List Interaction
     }
 
 
@@ -58,15 +57,15 @@ init _ =
             , updateScale sine "text1"
             ]
 
-        -- interactions =
-        --     [ removeEntity "monster1" "click"
-        --     ]
+        interactions =
+            [ resetX "monster1" "click"
+            ]
+
         initialModel =
             { updates = 0
             , entities = entities
             , behaviors = behaviors
-
-            -- , interactions = interactions
+            , interactions = interactions
             }
     in
     ( initialModel, Port.init (encodeEntities initialModel.entities) )
@@ -119,17 +118,44 @@ updateEntity delta updates behavior entity =
             Debug.todo "Blah!"
 
 
-handleInteraction : String -> String -> Entity -> Bool
-handleInteraction id event entity =
-    let
-        basicData =
-            getBasicData entity
-    in
-    if event == "click" && id == "monster1" && basicData.id == "monster1" then
-        False
+applyInteractionToEntity : String -> String -> Interaction -> Entity -> Entity
+applyInteractionToEntity id event interaction entity =
+    case entity of
+        AnimatedSprite basicData animatedSpriteData ->
+            Pixi.animatedSprite (interaction id event basicData) (AnimatedSpriteData animatedSpriteData.textures animatedSpriteData.animationSpeed)
+
+        Text basicData textData ->
+            Pixi.text (interaction id event basicData) (TextData textData.textString textData.textStyle)
+
+        _ ->
+            Debug.todo "Blah!"
+
+
+resetX : String -> String -> Interaction
+resetX idToCheck eventToCheck id event data =
+    if eventToCheck == event && id == idToCheck && data.id == idToCheck then
+        { data | x = 0 }
 
     else
-        True
+        data
+
+
+handleInteraction : String -> String -> Interaction -> List Entity -> List Entity
+handleInteraction id event interaction entities =
+    List.map (applyInteractionToEntity id event interaction) entities
+
+
+handleInteractions : String -> String -> List Entity -> List Interaction -> List Entity
+handleInteractions id event entities interactions =
+    interactions |> List.foldl (handleInteraction id event) entities
+
+
+
+-- updateEntities : Delta -> Int -> List Entity -> List Behavior -> List Entity
+-- updateEntities delta updates entities behaviors =
+--     behaviors
+--         |> List.foldl (runUpdates delta updates) entities
+-- foo id event
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -138,7 +164,8 @@ update msg lastModel =
         newModel =
             case msg of
                 Interaction { id, event } ->
-                    { lastModel | entities = List.filter (handleInteraction id event) lastModel.entities }
+                    -- { lastModel | entities = List.filter (handleInteraction id event) lastModel.entities }
+                    { lastModel | entities = handleInteractions id event lastModel.entities lastModel.interactions }
 
                 Tick delta ->
                     { lastModel

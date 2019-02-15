@@ -32,7 +32,7 @@ const PIXI_EVENTS = [
 ];
 
 export default ({
-  update, entityMap, addEntity, getTexture, incoming, /* removeEntity */
+  update, entityMap, addEntity, getTexture, incoming, removeEntity,
 }) => {
   update.subscribe((model) => {
     // model
@@ -106,11 +106,12 @@ export default ({
           addEntity(id, text);
         }
       });
+    // TODO: Remove Entities
+    Object.keys(entityMap).forEach((id) => {
+      const exists = model.map(m => m.id).includes(id);
+      if (!exists) {
+        removeEntity(id);
+      }
+    });
   });
-
-  // TODO: Remove Entities
-  // Object.values(entityMap).forEach((e) => {
-  //   model.filter(m => m.id !== e);
-  //   removeEntity(e.id, e);
-  // });
 };
