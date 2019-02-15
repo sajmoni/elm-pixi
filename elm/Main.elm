@@ -40,10 +40,10 @@ initialSceneEntities =
         { id = "monster1", x = 45, y = 45, scale = Just 3 }
         { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
     , text
-        { id = "text1", x = 145, y = 145, scale = Just 4 }
+        { id = "text1", x = 280, y = 145, scale = Just 4 }
         { textString = "ElmQuest", textStyle = { fill = "white", fontSize = 72 } }
     , text
-        { id = "startButton", x = 145, y = 300, scale = Just 4 }
+        { id = "startButton", x = 145, y = 300, scale = Just 1 }
         { textString = "Touch to Start", textStyle = { fill = "white", fontSize = 42 } }
     ]
 
@@ -56,7 +56,7 @@ init _ =
 
         behaviors =
             [ moveRight "monster1"
-            , updateScale sine "text1"
+            , updateScale sine "text1" 4
             ]
 
         interactions =
@@ -89,10 +89,10 @@ sine =
     Juice.sine { start = 1, end = 1.2, duration = 120 }
 
 
-updateScale : Juicer -> String -> Behavior
-updateScale getScale entityId delta updates data =
+updateScale : Juicer -> String -> Float -> Behavior
+updateScale getScale entityId originalScale delta updates data =
     if entityId == data.id then
-        { data | scale = Just (getScale updates) }
+        { data | scale = Just (getScale updates * originalScale) }
 
     else
         data
@@ -159,6 +159,10 @@ toTuples entities =
     List.map makeEntityMsgTuple entities
 
 
+
+-- This is probably completely nonsense, creating a Noop Msg for each Entity in state.
+
+
 makeEntityMsgTuple entity =
     ( entity, Noop )
 
@@ -179,6 +183,10 @@ removeEntity id entity =
 
     else
         True
+
+
+
+-- Why is this even needed?? Must be a simpler way
 
 
 callUpdate : (Msg -> Model -> ( Model, Cmd Msg )) -> Msg -> Model -> Model
@@ -218,7 +226,7 @@ update msg lastModel =
                     }
     in
     ( newModel
-    , Cmd.batch [ Port.update (encodeEntities newModel.entities) ]
+    , Port.update (encodeEntities newModel.entities)
     )
 
 
