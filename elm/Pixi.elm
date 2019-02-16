@@ -1,8 +1,12 @@
-module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), TextData, TextString, TextStyle, animatedSprite, getBasicData, text)
+module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), Id, TextData, TextString, TextStyle, animatedSprite, getBasicData, text)
+
+
+type alias Id =
+    String
 
 
 type alias BasicData =
-    { id : String
+    { id : Id
     , x : Float
     , y : Float
     , scale : Maybe Float
@@ -75,3 +79,8 @@ getBasicData entity =
 
         _ ->
             Debug.todo "Handle more cases in getBasicData"
+
+
+
+-- getEntity: Id -> Entity
+-- getEntity id =

@@ -19,8 +19,11 @@ encodeEntity entity =
                 , ( "y", float basicInformation.y )
                 , ( "scale", float (Maybe.withDefault 1 basicInformation.scale) )
                 , ( "text", string textData.textString )
-
-                -- , ( "textStyle", float (Maybe.withDefault 0.05 data.animationSpeed) )
+                , ( "textStyle"
+                  , object
+                        [ ( "fill", string textData.textStyle.fill )
+                        ]
+                  )
                 , ( "type", string "Text" )
                 ]
 

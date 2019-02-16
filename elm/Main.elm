@@ -36,6 +36,7 @@ type alias Model =
 type Msg
     = Interaction InteractionData
     | RemoveEntity String
+    | SetTextColor Id String
     | Noop
     | ChangeAppState AppState
     | Tick Delta
@@ -69,6 +70,8 @@ init _ =
         interactions =
             [ changeAppState "startButton" "click"
             , resetX "monster1" "click"
+            , makeSetTextColor "red" "startButton" "mouseover"
+            , makeSetTextColor "yellow" "startButton" "mouseout"
             ]
 
         initialModel =
@@ -159,7 +162,7 @@ type alias InteractionResult =
 resetX : String -> String -> Interaction
 resetX idToCheck eventToCheck id event data =
     if eventToCheck == event && idToCheck == id && data.id == idToCheck then
-        ( { data | x = 0 }, RemoveEntity idToCheck )
+        ( data, RemoveEntity idToCheck )
 
     else
         ( data, Noop )
@@ -174,6 +177,20 @@ changeAppState idToCheck eventToCheck id event data =
         ( data, Noop )
 
 
+makeSetTextColor : String -> String -> String -> Interaction
+makeSetTextColor color idToCheck eventToCheck id event data =
+    if eventToCheck == event && idToCheck == id && data.id == idToCheck then
+        ( data, SetTextColor idToCheck color )
+
+    else
+        ( data, Noop )
+
+
+
+-- highlightText : String -> String -> Interaction
+-- highlightText idToCheck eventToCheck id event data =
+
+
 handleInteraction : String -> String -> Interaction -> InteractionResult -> InteractionResult
 handleInteraction id event interaction result =
     let
@@ -183,14 +200,6 @@ handleInteraction id event interaction result =
     { entities = List.map Tuple.first tuples
     , messages = List.append result.messages (List.map Tuple.second tuples)
     }
-
-
-
--- toTuples entities =
---     List.map makeEntityMsgTuple entities
--- -- This is probably completely nonsense, creating a Noop Msg for each Entity in state.
--- makeEntityMsgTuple entity =
---     ( entity, Noop )
 
 
 isNoop : Msg -> Bool
@@ -240,6 +249,24 @@ callUpdate updateFn msg prevModel =
     model
 
 
+setTextColor : Id -> String -> Entity -> Entity
+setTextColor id color entity =
+    case entity of
+        Text basicData textData ->
+            let
+                textStyle =
+                    textData.textStyle
+            in
+            if id == basicData.id then
+                Pixi.text basicData { textData | textStyle = { textStyle | fill = color } }
+
+            else
+                entity
+
+        _ ->
+            entity
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
@@ -268,6 +295,15 @@ update msg lastModel =
                     in
                     { lastModel
                         | appState = appState
+                    }
+
+                SetTextColor id color ->
+                    let
+                        _ =
+                            Debug.log "color" color
+                    in
+                    { lastModel
+                        | entities = List.map (setTextColor id color) lastModel.entities
                     }
 
                 Tick delta ->

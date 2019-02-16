@@ -1,13 +1,13 @@
 import * as PIXI from 'pixi.js';
-import _ from 'lodash/fp';
+// import _ from 'lodash/fp';
 
 const PIXI_EVENTS = [
   // 'added',
   'click',
   // 'mousedown',
   // 'mousemove',
-  // 'mouseout',
-  // 'mouseover',
+  'mouseout',
+  'mouseover',
   // 'mouseup',
   // 'mouseupoutside',
   // 'pointercancel',
@@ -51,14 +51,25 @@ export default ({
 
     // Update entity
     model
-      .filter(e => entityMap[e.id] && (e.type === 'Text' || e.type === 'AnimatedSprite'))
+      .filter(e => entityMap[e.id])
       .forEach(({
-        id, x, y, scale,
+        id, x, y, scale, type, textStyle,
       }) => {
         const e = entityMap[id];
-        e.x = x;
-        e.y = y;
-        e.scale.set(scale);
+        if (type === 'AnimatedSprite') {
+          e.x = x;
+          e.y = y;
+          e.scale.set(scale);
+        }
+        if (type === 'Text') {
+          e.x = x;
+          e.y = y;
+          e.scale.set(scale);
+          if (textStyle && textStyle.fill && textStyle.fill !== e.style.fill) {
+            console.log({ textStyle });
+            e.style.fill = textStyle.fill;
+          }
+        }
       });
 
     // Add Entities that are new
