@@ -67,8 +67,8 @@ init _ =
             ]
 
         interactions =
-            [ resetX "monster1" "click"
-            , changeAppState "startButton" "click"
+            [ changeAppState "startButton" "click"
+            , resetX "monster1" "click"
             ]
 
         initialModel =
@@ -150,6 +150,12 @@ applyInteractionToEntity id event interaction entity =
             Debug.todo "Blah!"
 
 
+type alias InteractionResult =
+    { entities : List Entity
+    , messages : List Msg
+    }
+
+
 resetX : String -> String -> Interaction
 resetX idToCheck eventToCheck id event data =
     if eventToCheck == event && idToCheck == id && data.id == idToCheck then
@@ -168,26 +174,44 @@ changeAppState idToCheck eventToCheck id event data =
         ( data, Noop )
 
 
-handleInteraction : String -> String -> Interaction -> List ( Entity, Msg ) -> List ( Entity, Msg )
-handleInteraction id event interaction list =
-    List.map (applyInteractionToEntity id event interaction) (List.map Tuple.first list)
+handleInteraction : String -> String -> Interaction -> InteractionResult -> InteractionResult
+handleInteraction id event interaction result =
+    let
+        tuples =
+            List.map (applyInteractionToEntity id event interaction) result.entities
+    in
+    { entities = List.map Tuple.first tuples
+    , messages = List.append result.messages (List.map Tuple.second tuples)
+    }
 
 
-toTuples entities =
-    List.map makeEntityMsgTuple entities
+
+-- toTuples entities =
+--     List.map makeEntityMsgTuple entities
+-- -- This is probably completely nonsense, creating a Noop Msg for each Entity in state.
+-- makeEntityMsgTuple entity =
+--     ( entity, Noop )
 
 
+isNoop : Msg -> Bool
+isNoop msg =
+    case msg of
+        Noop ->
+            True
 
--- This is probably completely nonsense, creating a Noop Msg for each Entity in state.
+        _ ->
+            False
 
 
-makeEntityMsgTuple entity =
-    ( entity, Noop )
-
-
-handleInteractions : String -> String -> List Entity -> List Interaction -> List ( Entity, Msg )
+handleInteractions : String -> String -> List Entity -> List Interaction -> InteractionResult
 handleInteractions id event entities interactions =
-    interactions |> List.foldl (handleInteraction id event) (toTuples entities)
+    let
+        result =
+            interactions |> List.foldl (handleInteraction id event) (InteractionResult entities [])
+    in
+    { result
+        | messages = List.filter (isNoop >> not) result.messages
+    }
 
 
 removeEntity : String -> Entity -> Bool
@@ -227,9 +251,9 @@ update msg lastModel =
                             handleInteractions id event lastModel.entities lastModel.interactions
 
                         updatedModel =
-                            { lastModel | entities = List.map Tuple.first list }
+                            { lastModel | entities = list.entities }
                     in
-                    list |> List.map Tuple.second |> List.foldl (callUpdate update) updatedModel
+                    list.messages |> List.foldl (callUpdate update) updatedModel
 
                 RemoveEntity id ->
                     { lastModel | entities = List.filter (removeEntity id) lastModel.entities }
