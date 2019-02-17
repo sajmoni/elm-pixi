@@ -8,6 +8,7 @@ import Msg exposing (..)
 import Pixi exposing (..)
 import Platform
 import Port
+import Quest as QuestModule
 import Shared exposing (..)
 import Time
 import Title
@@ -20,6 +21,7 @@ type alias Model =
     , behaviors : List Behavior
     , interactions : List Interaction
     , appState : AppState
+    , gameState : GameState
     }
 
 
@@ -35,12 +37,25 @@ init _ =
         interactions =
             Title.interactions
 
+        gameState =
+            { quest =
+                QuestType
+                    (Room
+                        1
+                        (Pixi.animatedSprite
+                            { id = "test", x = 400, y = 140, scale = Just 8 }
+                            { textures = [ "monster_15", "monster_16" ], animationSpeed = Just 0.02 }
+                        )
+                    )
+            }
+
         initialModel =
             { updates = 0
             , entities = entities
             , behaviors = behaviors
             , interactions = interactions
             , appState = Title
+            , gameState = gameState
             }
     in
     ( initialModel, Port.init (encodeEntities initialModel.entities) )
@@ -138,14 +153,21 @@ processInteraction id event interactions =
     interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
 
 
-initScene : AppState -> Model -> Model
-initScene appState model =
+initScene : AppState -> GameState -> Model -> Model
+initScene appState gameState model =
     case appState of
         Town ->
             { model
                 | entities = Town.entities
                 , behaviors = Town.behaviors
                 , interactions = Town.interactions
+            }
+
+        Quest ->
+            { model
+                | entities = QuestModule.entities gameState
+                , behaviors = QuestModule.behaviors
+                , interactions = QuestModule.interactions
             }
 
         _ ->
@@ -177,7 +199,7 @@ update msg lastModel =
                     { lastModel
                         | appState = appState
                     }
-                        |> initScene appState
+                        |> initScene appState lastModel.gameState
 
                 SetTextColor id color ->
                     { lastModel

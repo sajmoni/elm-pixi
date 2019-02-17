@@ -12,12 +12,12 @@ encodeEntities =
 encodeEntity : Entity -> Value
 encodeEntity entity =
     case entity of
-        Text basicInformation textData ->
+        Text basicData textData ->
             object
-                [ ( "id", string basicInformation.id )
-                , ( "x", float basicInformation.x )
-                , ( "y", float basicInformation.y )
-                , ( "scale", float (Maybe.withDefault 1 basicInformation.scale) )
+                [ ( "id", string basicData.id )
+                , ( "x", float basicData.x )
+                , ( "y", float basicData.y )
+                , ( "scale", float (Maybe.withDefault 1 basicData.scale) )
                 , ( "text", string textData.textString )
                 , ( "textStyle"
                   , object
@@ -27,15 +27,25 @@ encodeEntity entity =
                 , ( "type", string "Text" )
                 ]
 
-        AnimatedSprite basicInformation textData ->
+        AnimatedSprite basicData textData ->
             object
-                [ ( "id", string basicInformation.id )
-                , ( "x", float basicInformation.x )
-                , ( "y", float basicInformation.y )
-                , ( "scale", float (Maybe.withDefault 1 basicInformation.scale) )
+                [ ( "id", string basicData.id )
+                , ( "x", float basicData.x )
+                , ( "y", float basicData.y )
+                , ( "scale", float (Maybe.withDefault 1 basicData.scale) )
                 , ( "textures", list string textData.textures )
                 , ( "animationSpeed", float (Maybe.withDefault 0.05 textData.animationSpeed) )
                 , ( "type", string "AnimatedSprite" )
+                ]
+
+        Sprite basicData spriteData ->
+            object
+                [ ( "id", string basicData.id )
+                , ( "x", float basicData.x )
+                , ( "y", float basicData.y )
+                , ( "scale", float (Maybe.withDefault 1 basicData.scale) )
+                , ( "texture", string spriteData.texture )
+                , ( "type", string "Sprite" )
                 ]
 
         _ ->

@@ -97,6 +97,24 @@ export default ({
           });
 
           addEntity(id, animatedSprite);
+        } else if (e.type === 'Sprite') {
+          const {
+            id, x, y, scale, texture,
+          } = e;
+          const sprite = new PIXI.Sprite(getTexture(texture));
+
+          sprite.x = x;
+          sprite.y = y;
+          sprite.scale.set(scale);
+          sprite.interactive = true;
+
+          PIXI_EVENTS.forEach((event) => {
+            sprite.on(event, () => {
+              incoming.send({ id, event });
+            });
+          });
+
+          addEntity(id, sprite);
         } else if (e.type === 'Text') {
           const {
             id, x, y, scale, text: textString,
@@ -116,7 +134,6 @@ export default ({
           addEntity(id, text);
         }
       });
-    // TODO: Remove Entities
     Object.keys(entityMap).forEach((id) => {
       const exists = model.map(m => m.id).includes(id);
       if (!exists) {

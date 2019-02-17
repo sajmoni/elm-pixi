@@ -63,7 +63,8 @@ interactions =
     , Interaction "startButton" "click" (RemoveEntity "monster1")
     , makeSetTextColor "red" "startButton" "mouseover"
     , makeSetTextColor "yellow" "startButton" "mouseout"
-    , createEntity "startButton" "click"
+
+    -- , createEntity "startButton" "click"
     , makeSetTextColor "red" "startButton" "click"
     ]
 
@@ -84,7 +85,7 @@ createEntity id event =
 
 changeAppState : String -> String -> Interaction
 changeAppState id event =
-    Interaction id event (ChangeAppState Town)
+    Interaction id event (ChangeAppState Quest)
 
 
 makeSetTextColor : String -> String -> String -> Interaction

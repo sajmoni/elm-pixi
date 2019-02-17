@@ -17,6 +17,7 @@ document.getElementById('game').appendChild(app.view);
 // TODO: Auto-load all spritesheets
 app.loader.add('spritesheet/food.json');
 app.loader.add('spritesheet/monster.json');
+app.loader.add('spritesheet/skill.json');
 
 const getTexture = makeGetTexture(app);
 

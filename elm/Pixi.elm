@@ -1,4 +1,4 @@
-module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), Id, TextData, TextString, TextStyle, animatedSprite, getBasicData, text)
+module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), Id, TextData, TextString, TextStyle, animatedSprite, getBasicData, sprite, text)
 
 
 type alias Id =
@@ -29,8 +29,13 @@ type alias TextData =
     }
 
 
+type alias SpriteData =
+    { texture : String
+    }
+
+
 type Entity
-    = Sprite BasicData
+    = Sprite BasicData SpriteData
     | AnimatedSprite BasicData AnimatedSpriteData
     | Graphics BasicData
     | Text BasicData TextData
@@ -68,6 +73,18 @@ text { id, x, y, scale } { textString, textStyle } =
         }
 
 
+sprite : BasicData -> SpriteData -> Entity
+sprite { id, x, y, scale } { texture } =
+    Sprite
+        { id = id
+        , x = x
+        , y = y
+        , scale = scale
+        }
+        { texture = texture
+        }
+
+
 getBasicData : Entity -> BasicData
 getBasicData entity =
     case entity of
@@ -75,6 +92,9 @@ getBasicData entity =
             basicData
 
         Text basicData _ ->
+            basicData
+
+        Sprite basicData _ ->
             basicData
 
         _ ->
