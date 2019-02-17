@@ -18,7 +18,7 @@ type alias Model =
     { entities : List Entity
     , updates : Int
     , behaviors : List Behavior
-    , interactions : List InteractionAlias
+    , interactions : List Interaction
     , appState : AppState
     }
 
@@ -70,7 +70,7 @@ updateEntity delta updates behavior entity =
             Debug.todo "Blah!"
 
 
-interactionOrNoop : String -> String -> InteractionAlias -> Msg
+interactionOrNoop : String -> String -> Interaction -> Msg
 interactionOrNoop idToCheck eventToCheck { id, event, msg } =
     if eventToCheck == event && idToCheck == id then
         msg
@@ -133,7 +133,7 @@ setTextColor id color entity =
             entity
 
 
-processInteraction : String -> String -> List InteractionAlias -> List Msg
+processInteraction : String -> String -> List Interaction -> List Msg
 processInteraction id event interactions =
     interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
 
@@ -157,7 +157,7 @@ update msg lastModel =
     let
         newModel =
             case msg of
-                Interaction { id, event } ->
+                PixiEvent { id, event } ->
                     let
                         messages =
                             lastModel.interactions |> processInteraction id event
@@ -197,7 +197,7 @@ update msg lastModel =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [ Port.incoming Interaction, Browser.Events.onAnimationFrameDelta Tick ]
+    Sub.batch [ Port.incoming PixiEvent, Browser.Events.onAnimationFrameDelta Tick ]
 
 
 main : Program () Model Msg

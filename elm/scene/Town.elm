@@ -26,6 +26,6 @@ behaviors =
 -- Interactions
 
 
-interactions : List InteractionAlias
+interactions : List Interaction
 interactions =
     []

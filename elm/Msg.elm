@@ -1,4 +1,4 @@
-module Msg exposing (AppState(..), InteractionAlias, Msg(..))
+module Msg exposing (AppState(..), EventData, Interaction, Msg(..))
 
 import Pixi exposing (..)
 import Shared exposing (..)
@@ -10,8 +10,14 @@ type AppState
     | Quest
 
 
+type alias EventData =
+    { id : String
+    , event : String
+    }
+
+
 type Msg
-    = Interaction InteractionData
+    = PixiEvent EventData
     | RemoveEntity String
     | AddEntity Entity
     | SetTextColor Id String
@@ -20,7 +26,7 @@ type Msg
     | Tick Delta
 
 
-type alias InteractionAlias =
+type alias Interaction =
     { id : String
     , event : String
     , msg : Msg

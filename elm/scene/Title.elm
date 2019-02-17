@@ -57,10 +57,10 @@ updateScale getScale entityId originalScale delta updates data =
 -- Interactions
 
 
-interactions : List InteractionAlias
+interactions : List Interaction
 interactions =
     [ changeAppState "startButton" "click"
-    , InteractionAlias "startButton" "click" (RemoveEntity "monster1")
+    , Interaction "startButton" "click" (RemoveEntity "monster1")
     , makeSetTextColor "red" "startButton" "mouseover"
     , makeSetTextColor "yellow" "startButton" "mouseout"
     , createEntity "startButton" "click"
@@ -68,25 +68,25 @@ interactions =
     ]
 
 
-deleteEntity : String -> String -> InteractionAlias
+deleteEntity : String -> String -> Interaction
 deleteEntity id event =
-    InteractionAlias id event (RemoveEntity id)
+    Interaction id event (RemoveEntity id)
 
 
-createEntity : String -> String -> InteractionAlias
+createEntity : String -> String -> Interaction
 createEntity id event =
     let
         newEntity =
             Pixi.animatedSprite { id = "monster2", x = 105, y = 145, scale = Just 3 } { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
     in
-    InteractionAlias id event (AddEntity newEntity)
+    Interaction id event (AddEntity newEntity)
 
 
-changeAppState : String -> String -> InteractionAlias
+changeAppState : String -> String -> Interaction
 changeAppState id event =
-    InteractionAlias id event (ChangeAppState Town)
+    Interaction id event (ChangeAppState Town)
 
 
-makeSetTextColor : String -> String -> String -> InteractionAlias
+makeSetTextColor : String -> String -> String -> Interaction
 makeSetTextColor color id event =
-    InteractionAlias id event (SetTextColor id color)
+    Interaction id event (SetTextColor id color)
