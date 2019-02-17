@@ -39,7 +39,7 @@ init _ =
             , entities = entities
             , behaviors = behaviors
             , interactions = interactions
-            , appState = MainMenu
+            , appState = Title
             }
     in
     ( initialModel, Port.init (encodeEntities initialModel.entities) )

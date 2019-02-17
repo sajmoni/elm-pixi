@@ -83,7 +83,7 @@ createEntity id event =
 
 changeAppState : String -> String -> InteractionAlias
 changeAppState id event =
-    InteractionAlias id event (ChangeAppState Game)
+    InteractionAlias id event (ChangeAppState Town)
 
 
 makeSetTextColor : String -> String -> String -> InteractionAlias

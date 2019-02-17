@@ -5,8 +5,9 @@ import Shared exposing (..)
 
 
 type AppState
-    = MainMenu
-    | Game
+    = Title
+    | Town
+    | Quest
 
 
 type Msg
