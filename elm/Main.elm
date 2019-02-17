@@ -4,27 +4,13 @@ import Browser.Events
 import Encode exposing (..)
 import Json.Encode exposing (..)
 import Juice exposing (..)
+import Msg exposing (..)
 import Pixi exposing (..)
 import Platform
 import Port
-import Shared exposing (Delta, InteractionData)
+import Shared exposing (..)
 import Time
-
-
-type alias Behavior =
-    Delta -> Int -> BasicData -> BasicData
-
-
-type alias InteractionAlias =
-    { id : String
-    , event : String
-    , msg : Msg
-    }
-
-
-type AppState
-    = MainMenu
-    | Game
+import Title
 
 
 type alias Model =
@@ -36,49 +22,17 @@ type alias Model =
     }
 
 
-type Msg
-    = Interaction InteractionData
-    | RemoveEntity String
-    | AddEntity Entity
-    | SetTextColor Id String
-    | Noop
-    | ChangeAppState AppState
-    | Tick Delta
-
-
-initialSceneEntities : List Entity
-initialSceneEntities =
-    [ animatedSprite
-        { id = "monster1", x = 45, y = 45, scale = Just 3 }
-        { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
-    , text
-        { id = "text1", x = 280, y = 145, scale = Just 4 }
-        { textString = "ElmQuest", textStyle = { fill = "white", fontSize = 72 } }
-    , text
-        { id = "startButton", x = 145, y = 300, scale = Just 1 }
-        { textString = "Touch to Start", textStyle = { fill = "white", fontSize = 42 } }
-    ]
-
-
 init : flags -> ( Model, Cmd msg )
 init _ =
     let
         entities =
-            initialSceneEntities
+            Title.entities
 
         behaviors =
-            [ moveRight "monster1"
-            , updateScale sine "text1" 4
-            ]
+            Title.behaviors
 
         interactions =
-            [ changeAppState "startButton" "click"
-            , InteractionAlias "startButton" "click" (RemoveEntity "monster1")
-            , makeSetTextColor "red" "startButton" "mouseover"
-            , makeSetTextColor "yellow" "startButton" "mouseout"
-            , createEntity "startButton" "click"
-            , makeSetTextColor "red" "startButton" "click"
-            ]
+            Title.interactions
 
         initialModel =
             { updates = 0
@@ -102,29 +56,6 @@ runUpdates delta updates behavior entities =
     List.map (updateEntity delta updates behavior) entities
 
 
-sine : Juicer
-sine =
-    Juice.sine { start = 1, end = 1.2, duration = 120 }
-
-
-updateScale : Juicer -> String -> Float -> Behavior
-updateScale getScale entityId originalScale delta updates data =
-    if entityId == data.id then
-        { data | scale = Just (getScale updates * originalScale) }
-
-    else
-        data
-
-
-moveRight : String -> Behavior
-moveRight entityId delta updates data =
-    if entityId == data.id then
-        { data | x = data.x + 10 / delta }
-
-    else
-        data
-
-
 updateEntity : Delta -> Int -> Behavior -> Entity -> Entity
 updateEntity delta updates behavior entity =
     case entity of
@@ -136,39 +67,6 @@ updateEntity delta updates behavior entity =
 
         _ ->
             Debug.todo "Blah!"
-
-
-deleteEntity : String -> String -> InteractionAlias
-deleteEntity id event =
-    InteractionAlias id event (RemoveEntity id)
-
-
-createEntity : String -> String -> InteractionAlias
-createEntity id event =
-    let
-        newEntity =
-            Pixi.animatedSprite { id = "monster2", x = 105, y = 145, scale = Just 3 } { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
-    in
-    InteractionAlias id event (AddEntity newEntity)
-
-
-changeAppState : String -> String -> InteractionAlias
-changeAppState id event =
-    InteractionAlias id event (ChangeAppState Game)
-
-
-
--- makeSetTextColor : String -> String -> String -> Interaction
--- makeSetTextColor color idToCheck eventToCheck id event data =
---     if eventToCheck == event && idToCheck == id && data.id == idToCheck then
---         ( data, SetTextColor idToCheck color )
---     else
---         ( data, Noop )
-
-
-makeSetTextColor : String -> String -> String -> InteractionAlias
-makeSetTextColor color id event =
-    InteractionAlias id event (SetTextColor id color)
 
 
 interactionOrNoop : String -> String -> InteractionAlias -> Msg

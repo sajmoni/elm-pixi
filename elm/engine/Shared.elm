@@ -1,4 +1,6 @@
-module Shared exposing (Delta, InteractionData)
+module Shared exposing (Behavior, Delta, InteractionData)
+
+import Pixi exposing (BasicData)
 
 
 type alias Delta =
@@ -9,3 +11,7 @@ type alias InteractionData =
     { id : String
     , event : String
     }
+
+
+type alias Behavior =
+    Delta -> Int -> BasicData -> BasicData

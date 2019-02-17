@@ -66,7 +66,6 @@ export default ({
           e.y = y;
           e.scale.set(scale);
           if (textStyle && textStyle.fill && textStyle.fill !== e.style.fill) {
-            console.log({ textStyle });
             e.style.fill = textStyle.fill;
           }
         }
