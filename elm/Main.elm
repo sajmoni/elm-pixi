@@ -11,6 +11,7 @@ import Port
 import Shared exposing (..)
 import Time
 import Title
+import Town
 
 
 type alias Model =
@@ -137,6 +138,20 @@ processInteraction id event interactions =
     interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
 
 
+initScene : AppState -> Model -> Model
+initScene appState model =
+    case appState of
+        Town ->
+            { model
+                | entities = Town.entities
+                , behaviors = Town.behaviors
+                , interactions = Town.interactions
+            }
+
+        _ ->
+            Debug.todo "initScene" appState
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
@@ -162,6 +177,7 @@ update msg lastModel =
                     { lastModel
                         | appState = appState
                     }
+                        |> initScene appState
 
                 SetTextColor id color ->
                     { lastModel

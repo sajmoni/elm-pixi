@@ -57,6 +57,7 @@ updateScale getScale entityId originalScale delta updates data =
 -- Interactions
 
 
+interactions : List InteractionAlias
 interactions =
     [ changeAppState "startButton" "click"
     , InteractionAlias "startButton" "click" (RemoveEntity "monster1")
