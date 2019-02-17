@@ -15,8 +15,11 @@ type alias Behavior =
     Delta -> Int -> BasicData -> BasicData
 
 
-type alias Interaction =
-    String -> String -> BasicData -> ( BasicData, Msg )
+type alias InteractionAlias =
+    { id : String
+    , event : String
+    , msg : Msg
+    }
 
 
 type AppState
@@ -28,7 +31,7 @@ type alias Model =
     { entities : List Entity
     , updates : Int
     , behaviors : List Behavior
-    , interactions : List Interaction
+    , interactions : List InteractionAlias
     , appState : AppState
     }
 
@@ -36,6 +39,7 @@ type alias Model =
 type Msg
     = Interaction InteractionData
     | RemoveEntity String
+    | AddEntity Entity
     | SetTextColor Id String
     | Noop
     | ChangeAppState AppState
@@ -69,9 +73,11 @@ init _ =
 
         interactions =
             [ changeAppState "startButton" "click"
-            , resetX "monster1" "click"
+            , InteractionAlias "startButton" "click" (RemoveEntity "monster1")
             , makeSetTextColor "red" "startButton" "mouseover"
             , makeSetTextColor "yellow" "startButton" "mouseout"
+            , createEntity "startButton" "click"
+            , makeSetTextColor "red" "startButton" "click"
             ]
 
         initialModel =
@@ -132,74 +138,46 @@ updateEntity delta updates behavior entity =
             Debug.todo "Blah!"
 
 
-applyInteractionToEntity : String -> String -> Interaction -> Entity -> ( Entity, Msg )
-applyInteractionToEntity id event interaction entity =
-    case entity of
-        AnimatedSprite basicData animatedSpriteData ->
-            let
-                ( newBasicData, msg ) =
-                    interaction id event basicData
-            in
-            ( Pixi.animatedSprite newBasicData (AnimatedSpriteData animatedSpriteData.textures animatedSpriteData.animationSpeed), msg )
-
-        Text basicData textData ->
-            let
-                ( newBasicData, msg ) =
-                    interaction id event basicData
-            in
-            ( Pixi.text newBasicData (TextData textData.textString textData.textStyle), msg )
-
-        _ ->
-            Debug.todo "Blah!"
+deleteEntity : String -> String -> InteractionAlias
+deleteEntity id event =
+    InteractionAlias id event (RemoveEntity id)
 
 
-type alias InteractionResult =
-    { entities : List Entity
-    , messages : List Msg
-    }
-
-
-resetX : String -> String -> Interaction
-resetX idToCheck eventToCheck id event data =
-    if eventToCheck == event && idToCheck == id && data.id == idToCheck then
-        ( data, RemoveEntity idToCheck )
-
-    else
-        ( data, Noop )
-
-
-changeAppState : String -> String -> Interaction
-changeAppState idToCheck eventToCheck id event data =
-    if eventToCheck == event && idToCheck == id && data.id == idToCheck then
-        ( data, ChangeAppState Game )
-
-    else
-        ( data, Noop )
-
-
-makeSetTextColor : String -> String -> String -> Interaction
-makeSetTextColor color idToCheck eventToCheck id event data =
-    if eventToCheck == event && idToCheck == id && data.id == idToCheck then
-        ( data, SetTextColor idToCheck color )
-
-    else
-        ( data, Noop )
-
-
-
--- highlightText : String -> String -> Interaction
--- highlightText idToCheck eventToCheck id event data =
-
-
-handleInteraction : String -> String -> Interaction -> InteractionResult -> InteractionResult
-handleInteraction id event interaction result =
+createEntity : String -> String -> InteractionAlias
+createEntity id event =
     let
-        tuples =
-            List.map (applyInteractionToEntity id event interaction) result.entities
+        newEntity =
+            Pixi.animatedSprite { id = "monster2", x = 105, y = 145, scale = Just 3 } { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
     in
-    { entities = List.map Tuple.first tuples
-    , messages = List.append result.messages (List.map Tuple.second tuples)
-    }
+    InteractionAlias id event (AddEntity newEntity)
+
+
+changeAppState : String -> String -> InteractionAlias
+changeAppState id event =
+    InteractionAlias id event (ChangeAppState Game)
+
+
+
+-- makeSetTextColor : String -> String -> String -> Interaction
+-- makeSetTextColor color idToCheck eventToCheck id event data =
+--     if eventToCheck == event && idToCheck == id && data.id == idToCheck then
+--         ( data, SetTextColor idToCheck color )
+--     else
+--         ( data, Noop )
+
+
+makeSetTextColor : String -> String -> String -> InteractionAlias
+makeSetTextColor color id event =
+    InteractionAlias id event (SetTextColor id color)
+
+
+interactionOrNoop : String -> String -> InteractionAlias -> Msg
+interactionOrNoop idToCheck eventToCheck { id, event, msg } =
+    if eventToCheck == event && idToCheck == id then
+        msg
+
+    else
+        Noop
 
 
 isNoop : Msg -> Bool
@@ -210,17 +188,6 @@ isNoop msg =
 
         _ ->
             False
-
-
-handleInteractions : String -> String -> List Entity -> List Interaction -> InteractionResult
-handleInteractions id event entities interactions =
-    let
-        result =
-            interactions |> List.foldl (handleInteraction id event) (InteractionResult entities [])
-    in
-    { result
-        | messages = List.filter (isNoop >> not) result.messages
-    }
 
 
 removeEntity : String -> Entity -> Bool
@@ -267,6 +234,11 @@ setTextColor id color entity =
             entity
 
 
+processInteraction : String -> String -> List InteractionAlias -> List Msg
+processInteraction id event interactions =
+    interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
@@ -274,34 +246,26 @@ update msg lastModel =
             case msg of
                 Interaction { id, event } ->
                     let
-                        list =
-                            handleInteractions id event lastModel.entities lastModel.interactions
-
-                        updatedModel =
-                            { lastModel | entities = list.entities }
+                        messages =
+                            lastModel.interactions |> processInteraction id event
                     in
-                    list.messages |> List.foldl (callUpdate update) updatedModel
+                    messages |> List.foldl (callUpdate update) lastModel
 
                 RemoveEntity id ->
                     { lastModel | entities = List.filter (removeEntity id) lastModel.entities }
+
+                AddEntity entity ->
+                    { lastModel | entities = entity :: lastModel.entities }
 
                 Noop ->
                     lastModel
 
                 ChangeAppState appState ->
-                    let
-                        _ =
-                            Debug.log "appstate" appState
-                    in
                     { lastModel
                         | appState = appState
                     }
 
                 SetTextColor id color ->
-                    let
-                        _ =
-                            Debug.log "color" color
-                    in
                     { lastModel
                         | entities = List.map (setTextColor id color) lastModel.entities
                     }
