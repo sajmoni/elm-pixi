@@ -37,16 +37,21 @@ init _ =
         interactions =
             Title.interactions
 
+        gameStateUpdates =
+            Quest.gameStateUpdates
+
         gameState =
             { quest =
                 QuestType
-                    (Room
-                        1
-                        (Pixi.animatedSprite
+                    { index = 1
+                    , turn = Player
+                    , currentHp = 100
+                    , maxHp = 100
+                    , render =
+                        Pixi.animatedSprite
                             { id = "test", x = 400, y = 140, scale = Just 8, alpha = Nothing }
-                            { textures = [ "monster_15", "monster_16" ], animationSpeed = Just 0.02 }
-                        )
-                    )
+                            { textures = [ "monster_17", "monster_18" ], animationSpeed = Just 0.02 }
+                    }
             }
 
         initialModel =
@@ -174,6 +179,10 @@ initScene appState gameState model =
             Debug.todo "initScene" appState
 
 
+updateGameState : Int -> List (Int -> Int -> GameState -> GameState) -> GameState -> GameState
+updateGameState updates gameState =
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
@@ -210,6 +219,7 @@ update msg lastModel =
                     { lastModel
                         | updates = lastModel.updates + 1
                         , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
+                        , gameState = updateGameState lastModel.updates lastModel.gameState
                     }
     in
     ( newModel

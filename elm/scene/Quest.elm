@@ -13,8 +13,19 @@ entities gameState =
                 { id = "questTitle", x = 280, y = 80, scale = Nothing, alpha = Nothing }
                 { textString = "Quest", textStyle = { fill = "white", fontSize = 12 } }
             , Pixi.graphics
-                { id = "healthBar1", x = 280, y = 80, scale = Nothing, alpha = Nothing }
+                { id = "healthBar1", x = 50, y = 280, scale = Nothing, alpha = Nothing }
+                { color = "red", shape = Pixi.Rectangle 250 25 }
             ]
+
+
+
+-- GameStateUpdates
+
+
+gameStateUpdates : List (Int -> GameState -> GameState)
+gameStateUpdates =
+    [ combat 60
+    ]
 
 
 
@@ -85,3 +96,34 @@ inventory =
         { id = "weaponSlot", x = skillStartPositionX + skillWidth * 4, y = skillStartPositionY, scale = Just 4, alpha = Nothing }
         { texture = "equipment_33" }
     ]
+
+
+setTurn : Turn -> Room -> Room
+setTurn turn room =
+    { room | turn = turn }
+
+
+setQuest : QuestType -> GameState -> GameState
+setQuest quest gameState =
+    { gameState | quest = quest }
+
+
+setRoom : Room -> QuestType -> QuestType
+setRoom room quest =
+    { quest | rooms = room }
+
+
+combat : Int -> Int -> GameState -> GameState
+combat everyNthUpdate updates gameState =
+    let
+        newTurn =
+            if gameState.quest.rooms.turn == Player then
+                Enemy
+
+            else
+                Player
+
+        _ =
+            Debug.log "newTurn" newTurn
+    in
+    gameState |> setQuest (gameState.quest |> setRoom (gameState.quest.rooms |> setTurn newTurn))

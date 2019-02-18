@@ -1,8 +1,12 @@
-module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), Id, SpriteData, TextData, TextString, TextStyle, animatedSprite, getBasicData, graphics, sprite, text)
+module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), GraphicsData, Height, Id, Shape(..), SpriteData, TextData, TextString, TextStyle, Width, animatedSprite, getBasicData, graphics, sprite, text)
 
 
 type alias Id =
     String
+
+
+type Shape
+    = Rectangle Width Height
 
 
 type alias BasicData =
@@ -11,6 +15,20 @@ type alias BasicData =
     , y : Float
     , scale : Maybe Float
     , alpha : Maybe Float
+    }
+
+
+type alias Width =
+    Int
+
+
+type alias Height =
+    Int
+
+
+type alias GraphicsData =
+    { color : String
+    , shape : Shape
     }
 
 
@@ -38,7 +56,7 @@ type alias SpriteData =
 type Entity
     = Sprite BasicData SpriteData
     | AnimatedSprite BasicData AnimatedSpriteData
-    | Graphics BasicData
+    | Graphics BasicData GraphicsData
     | Text BasicData TextData
     | NotImplemented
 
@@ -90,14 +108,17 @@ sprite { id, x, y, scale, alpha } { texture } =
         }
 
 
-graphics : BasicData -> Entity
-graphics { id, x, y, scale, alpha } =
+graphics : BasicData -> GraphicsData -> Entity
+graphics { id, x, y, scale, alpha } { color, shape } =
     Graphics
         { id = id
         , x = x
         , y = y
         , scale = scale
         , alpha = alpha
+        }
+        { color = color
+        , shape = shape
         }
 
 
@@ -113,7 +134,7 @@ getBasicData entity =
         Sprite basicData _ ->
             basicData
 
-        Graphics basicData ->
+        Graphics basicData _ ->
             basicData
 
         _ ->

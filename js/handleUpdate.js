@@ -134,7 +134,7 @@ export default ({
           addEntity(id, text);
         } else if (e.type === 'Graphics') {
           const {
-            id, x, y, scale,
+            id, x, y, scale, width, height, alpha, color,
           } = e;
           const graphics = new PIXI.Graphics();
           graphics.x = x;
@@ -146,6 +146,10 @@ export default ({
               incoming.send({ id, event });
             });
           });
+
+          graphics
+            .beginFill(0xffff00, alpha)
+            .drawRect(0, 0, width, height);
           addEntity(id, graphics);
         }
       });

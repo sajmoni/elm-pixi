@@ -15,7 +15,17 @@ encodeBasicData basicData =
     , ( "x", float basicData.x )
     , ( "y", float basicData.y )
     , ( "scale", float (Maybe.withDefault 1 basicData.scale) )
+    , ( "alpha", float (Maybe.withDefault 1 basicData.alpha) )
     ]
+
+
+encodeShape : Shape -> List ( String, Value )
+encodeShape shape =
+    case shape of
+        Rectangle width height ->
+            [ ( "width", int width )
+            , ( "height", int height )
+            ]
 
 
 encodeEntity : Entity -> Value
@@ -54,12 +64,13 @@ encodeEntity entity =
                     ]
                 )
 
-        Graphics basicData ->
+        Graphics basicData graphicsData ->
             object
-                (List.append
-                    (encodeBasicData basicData)
-                    [ ( "type", string "Graphics" )
-                    ]
+                (encodeShape graphicsData.shape
+                    ++ encodeBasicData basicData
+                    ++ [ ( "color", string graphicsData.color )
+                       , ( "type", string "Graphics" )
+                       ]
                 )
 
         _ ->
