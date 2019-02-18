@@ -43,7 +43,7 @@ init _ =
                     (Room
                         1
                         (Pixi.animatedSprite
-                            { id = "test", x = 400, y = 140, scale = Just 8 }
+                            { id = "test", x = 400, y = 140, scale = Just 8, alpha = Nothing }
                             { textures = [ "monster_15", "monster_16" ], animationSpeed = Just 0.02 }
                         )
                     )

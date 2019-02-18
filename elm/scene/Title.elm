@@ -9,13 +9,13 @@ import Shared exposing (..)
 entities : List Pixi.Entity
 entities =
     [ Pixi.animatedSprite
-        { id = "monster1", x = 45, y = 45, scale = Just 3 }
+        { id = "monster1", x = 45, y = 45, scale = Just 3, alpha = Nothing }
         { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
     , Pixi.text
-        { id = "text1", x = 280, y = 145, scale = Just 4 }
+        { id = "text1", x = 280, y = 145, scale = Just 4, alpha = Nothing }
         { textString = "ElmQuest", textStyle = { fill = "white", fontSize = 72 } }
     , Pixi.text
-        { id = "startButton", x = 145, y = 300, scale = Just 1 }
+        { id = "startButton", x = 145, y = 300, scale = Just 1, alpha = Nothing }
         { textString = "Touch to Start", textStyle = { fill = "white", fontSize = 42 } }
     ]
 
@@ -78,7 +78,9 @@ createEntity : String -> String -> Interaction
 createEntity id event =
     let
         newEntity =
-            Pixi.animatedSprite { id = "monster2", x = 105, y = 145, scale = Just 3 } { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
+            Pixi.animatedSprite
+                { id = "monster2", x = 105, y = 145, scale = Just 3, alpha = Nothing }
+                { textures = [ "monster_01", "monster_02" ], animationSpeed = Just 0.01 }
     in
     Interaction id event (AddEntity newEntity)
 

@@ -132,6 +132,21 @@ export default ({
             });
           });
           addEntity(id, text);
+        } else if (e.type === 'Graphics') {
+          const {
+            id, x, y, scale,
+          } = e;
+          const graphics = new PIXI.Graphics();
+          graphics.x = x;
+          graphics.y = y;
+          graphics.scale.set(scale);
+          graphics.interactive = true;
+          PIXI_EVENTS.forEach((event) => {
+            graphics.on(event, () => {
+              incoming.send({ id, event });
+            });
+          });
+          addEntity(id, graphics);
         }
       });
     Object.keys(entityMap).forEach((id) => {

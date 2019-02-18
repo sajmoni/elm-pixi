@@ -1,4 +1,4 @@
-module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), Id, TextData, TextString, TextStyle, animatedSprite, getBasicData, sprite, text)
+module Pixi exposing (AnimatedSpriteData, BasicData, Entity(..), Id, SpriteData, TextData, TextString, TextStyle, animatedSprite, getBasicData, graphics, sprite, text)
 
 
 type alias Id =
@@ -10,6 +10,7 @@ type alias BasicData =
     , x : Float
     , y : Float
     , scale : Maybe Float
+    , alpha : Maybe Float
     }
 
 
@@ -39,6 +40,7 @@ type Entity
     | AnimatedSprite BasicData AnimatedSpriteData
     | Graphics BasicData
     | Text BasicData TextData
+    | NotImplemented
 
 
 type alias TextStyle =
@@ -48,12 +50,13 @@ type alias TextStyle =
 
 
 animatedSprite : BasicData -> AnimatedSpriteData -> Entity
-animatedSprite { id, x, y, scale } { textures, animationSpeed } =
+animatedSprite { id, x, y, scale, alpha } { textures, animationSpeed } =
     AnimatedSprite
         { id = id
         , x = x
         , y = y
         , scale = scale
+        , alpha = alpha
         }
         { textures = textures
         , animationSpeed = animationSpeed
@@ -61,12 +64,13 @@ animatedSprite { id, x, y, scale } { textures, animationSpeed } =
 
 
 text : BasicData -> TextData -> Entity
-text { id, x, y, scale } { textString, textStyle } =
+text { id, x, y, scale, alpha } { textString, textStyle } =
     Text
         { id = id
         , x = x
         , y = y
         , scale = scale
+        , alpha = alpha
         }
         { textString = textString
         , textStyle = textStyle
@@ -74,14 +78,26 @@ text { id, x, y, scale } { textString, textStyle } =
 
 
 sprite : BasicData -> SpriteData -> Entity
-sprite { id, x, y, scale } { texture } =
+sprite { id, x, y, scale, alpha } { texture } =
     Sprite
         { id = id
         , x = x
         , y = y
         , scale = scale
+        , alpha = alpha
         }
         { texture = texture
+        }
+
+
+graphics : BasicData -> Entity
+graphics { id, x, y, scale, alpha } =
+    Graphics
+        { id = id
+        , x = x
+        , y = y
+        , scale = scale
+        , alpha = alpha
         }
 
 
@@ -95,6 +111,9 @@ getBasicData entity =
             basicData
 
         Sprite basicData _ ->
+            basicData
+
+        Graphics basicData ->
             basicData
 
         _ ->

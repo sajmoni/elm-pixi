@@ -18,6 +18,7 @@ document.getElementById('game').appendChild(app.view);
 app.loader.add('spritesheet/food.json');
 app.loader.add('spritesheet/monster.json');
 app.loader.add('spritesheet/skill.json');
+app.loader.add('spritesheet/equipment.json');
 
 const getTexture = makeGetTexture(app);
 
