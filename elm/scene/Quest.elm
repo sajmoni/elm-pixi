@@ -15,6 +15,9 @@ entities gameState =
             , Pixi.graphics
                 { id = "healthBar1", x = 50, y = 280, scale = Nothing, alpha = Nothing }
                 { color = "red", shape = Pixi.Rectangle 250 25 }
+            , Pixi.text
+                { id = "hp", x = 400, y = 400, scale = Nothing, alpha = Nothing }
+                { textString = String.fromInt gameState.quest.rooms.currentHp, textStyle = { fill = "white", fontSize = 12 } }
             ]
 
 
@@ -113,9 +116,14 @@ setRoom room quest =
     { quest | rooms = room }
 
 
+setEnemyHp : Int -> Room -> Room
+setEnemyHp hp room =
+    { room | currentHp = hp }
+
+
 shouldExecuteUpdate : Int -> Int -> Int -> Bool
 shouldExecuteUpdate firstUpdate everyNthUpdate currentUpdate =
-    modBy everyNthUpdate currentUpdate == 0
+    modBy everyNthUpdate (currentUpdate - firstUpdate) == 0
 
 
 combat : Int -> Int -> Int -> GameState -> GameState
@@ -136,7 +144,15 @@ combat firstUpdate everyNthUpdate updates gameState =
             _ =
                 Debug.log "newTurn" newTurn
         in
-        gameState |> setQuest (gameState.quest |> setRoom (gameState.quest.rooms |> setTurn newTurn))
+        gameState
+            |> setQuest
+                (gameState.quest
+                    |> setRoom
+                        (gameState.quest.rooms
+                            |> setTurn newTurn
+                            |> setEnemyHp (gameState.quest.rooms.currentHp - 1)
+                        )
+                )
 
     else
         gameState

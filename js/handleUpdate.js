@@ -53,7 +53,7 @@ export default ({
     model
       .filter(e => entityMap[e.id])
       .forEach(({
-        id, x, y, scale, type, textStyle,
+        id, x, y, scale, type, textStyle, text,
       }) => {
         const e = entityMap[id];
         if (type === 'AnimatedSprite') {
@@ -67,6 +67,9 @@ export default ({
           e.scale.set(scale);
           if (textStyle && textStyle.fill && textStyle.fill !== e.style.fill) {
             e.style.fill = textStyle.fill;
+          }
+          if (e.text !== text) {
+            e.text = text;
           }
         }
       });

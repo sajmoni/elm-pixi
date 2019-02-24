@@ -39,7 +39,7 @@ init _ =
             Title.interactions
 
         gameStateUpdates =
-            QuestModule.gameStateUpdates 0
+            []
 
         gameState =
             { quest =
@@ -160,8 +160,8 @@ processInteraction id event interactions =
     interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
 
 
-initScene : AppState -> GameState -> Model -> Model
-initScene appState gameState model =
+initScene : Int -> AppState -> GameState -> Model -> Model
+initScene updates appState gameState model =
     case appState of
         Town ->
             { model
@@ -175,6 +175,7 @@ initScene appState gameState model =
                 | entities = QuestModule.entities gameState
                 , behaviors = QuestModule.behaviors
                 , interactions = QuestModule.interactions
+                , gameStateUpdates = QuestModule.gameStateUpdates updates
             }
 
         _ ->
@@ -211,7 +212,7 @@ update msg lastModel =
                     { lastModel
                         | appState = appState
                     }
-                        |> initScene appState lastModel.gameState
+                        |> initScene lastModel.updates appState lastModel.gameState
 
                 SetTextColor id color ->
                     { lastModel
@@ -222,7 +223,9 @@ update msg lastModel =
                     { lastModel
                         | updates = lastModel.updates + 1
                         , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
-                        , gameState = lastModel.gameStateUpdates |> List.foldl (updateGameState lastModel.updates) lastModel.gameState
+                        , gameState =
+                            lastModel.gameStateUpdates
+                                |> List.foldl (updateGameState lastModel.updates) lastModel.gameState
                     }
     in
     ( newModel
