@@ -1,4 +1,4 @@
-module Quest exposing (behaviors, entities, interactions)
+module Quest exposing (behaviors, combat, entities, gameStateUpdates, interactions, inventory, setQuest, setRoom, setTurn, skillBar, skillStartPositionX, skillStartPositionY, skillWidth)
 
 import Msg exposing (..)
 import Pixi
@@ -22,9 +22,9 @@ entities gameState =
 -- GameStateUpdates
 
 
-gameStateUpdates : List (Int -> GameState -> GameState)
-gameStateUpdates =
-    [ combat 60
+gameStateUpdates : Int -> List (Int -> GameState -> GameState)
+gameStateUpdates currentUpdate =
+    [ combat currentUpdate 60
     ]
 
 
@@ -113,17 +113,30 @@ setRoom room quest =
     { quest | rooms = room }
 
 
-combat : Int -> Int -> GameState -> GameState
-combat everyNthUpdate updates gameState =
+shouldExecuteUpdate : Int -> Int -> Int -> Bool
+shouldExecuteUpdate firstUpdate everyNthUpdate currentUpdate =
+    modBy everyNthUpdate currentUpdate == 0
+
+
+combat : Int -> Int -> Int -> GameState -> GameState
+combat firstUpdate everyNthUpdate updates gameState =
     let
-        newTurn =
-            if gameState.quest.rooms.turn == Player then
-                Enemy
-
-            else
-                Player
-
-        _ =
-            Debug.log "newTurn" newTurn
+        shouldUpdate =
+            shouldExecuteUpdate firstUpdate everyNthUpdate updates
     in
-    gameState |> setQuest (gameState.quest |> setRoom (gameState.quest.rooms |> setTurn newTurn))
+    if shouldUpdate then
+        let
+            newTurn =
+                if gameState.quest.rooms.turn == Player then
+                    Enemy
+
+                else
+                    Player
+
+            _ =
+                Debug.log "newTurn" newTurn
+        in
+        gameState |> setQuest (gameState.quest |> setRoom (gameState.quest.rooms |> setTurn newTurn))
+
+    else
+        gameState

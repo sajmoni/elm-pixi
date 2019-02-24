@@ -22,6 +22,7 @@ type alias Model =
     , interactions : List Interaction
     , appState : AppState
     , gameState : GameState
+    , gameStateUpdates : List (Int -> GameState -> GameState)
     }
 
 
@@ -38,7 +39,7 @@ init _ =
             Title.interactions
 
         gameStateUpdates =
-            Quest.gameStateUpdates
+            QuestModule.gameStateUpdates 0
 
         gameState =
             { quest =
@@ -61,6 +62,7 @@ init _ =
             , interactions = interactions
             , appState = Title
             , gameState = gameState
+            , gameStateUpdates = gameStateUpdates
             }
     in
     ( initialModel, Port.init (encodeEntities initialModel.entities) )
@@ -179,8 +181,9 @@ initScene appState gameState model =
             Debug.todo "initScene" appState
 
 
-updateGameState : Int -> List (Int -> Int -> GameState -> GameState) -> GameState -> GameState
-updateGameState updates gameState =
+updateGameState : Int -> (Int -> GameState -> GameState) -> GameState -> GameState
+updateGameState updates gameStateUpdate gameState =
+    gameStateUpdate updates gameState
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -219,7 +222,7 @@ update msg lastModel =
                     { lastModel
                         | updates = lastModel.updates + 1
                         , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
-                        , gameState = updateGameState lastModel.updates lastModel.gameState
+                        , gameState = lastModel.gameStateUpdates |> List.foldl (updateGameState lastModel.updates) lastModel.gameState
                     }
     in
     ( newModel
