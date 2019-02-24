@@ -53,7 +53,7 @@ export default ({
     model
       .filter(e => entityMap[e.id])
       .forEach(({
-        id, x, y, scale, type, textStyle, text,
+        id, x, y, scale, type, textStyle, textString,
       }) => {
         const e = entityMap[id];
         if (type === 'AnimatedSprite') {
@@ -68,8 +68,8 @@ export default ({
           if (textStyle && textStyle.fill && textStyle.fill !== e.style.fill) {
             e.style.fill = textStyle.fill;
           }
-          if (e.text !== text) {
-            e.text = text;
+          if (e.text !== textString) {
+            e.text = textString;
           }
         }
       });
@@ -120,7 +120,7 @@ export default ({
           addEntity(id, sprite);
         } else if (e.type === 'Text') {
           const {
-            id, x, y, scale, text: textString,
+            id, x, y, scale, textString,
           } = e;
           const style = new PIXI.TextStyle({ fill: 'white', fontSize: 24 });
           const text = new PIXI.Text(textString, style);

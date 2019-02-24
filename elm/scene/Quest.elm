@@ -1,4 +1,4 @@
-module Quest exposing (behaviors, combat, entities, gameStateUpdates, interactions, inventory, setQuest, setRoom, setTurn, skillBar, skillStartPositionX, skillStartPositionY, skillWidth)
+module Quest exposing (behaviors, combat, entities, gameStateUpdates, interactions, inventory, setEnemyHp, setHp, setQuest, setRoom, setTurn, shouldExecuteUpdate, skillBar, skillStartPositionX, skillStartPositionY, skillWidth)
 
 import Msg exposing (..)
 import Pixi
@@ -25,7 +25,7 @@ entities gameState =
 -- GameStateUpdates
 
 
-gameStateUpdates : Int -> List (Int -> GameState -> GameState)
+gameStateUpdates : Int -> List (Int -> GameState -> List Msg)
 gameStateUpdates currentUpdate =
     [ combat currentUpdate 60
     ]
@@ -101,9 +101,18 @@ inventory =
     ]
 
 
-setTurn : Turn -> Room -> Room
-setTurn turn room =
-    { room | turn = turn }
+setTurn : Turn -> GameState -> GameState
+setTurn turn gameState =
+    let
+        rooms =
+            gameState.quest.rooms
+    in
+    gameState
+        |> setQuest
+            (gameState.quest
+                |> setRoom
+                    { rooms | turn = turn }
+            )
 
 
 setQuest : QuestType -> GameState -> GameState
@@ -116,8 +125,8 @@ setRoom room quest =
     { quest | rooms = room }
 
 
-setEnemyHp : Int -> Room -> Room
-setEnemyHp hp room =
+setHp : Int -> Room -> Room
+setHp hp room =
     { room | currentHp = hp }
 
 
@@ -126,7 +135,19 @@ shouldExecuteUpdate firstUpdate everyNthUpdate currentUpdate =
     modBy everyNthUpdate (currentUpdate - firstUpdate) == 0
 
 
-combat : Int -> Int -> Int -> GameState -> GameState
+setEnemyHp : Int -> GameState -> GameState
+setEnemyHp newHp gameState =
+    gameState
+        |> setQuest
+            (gameState.quest
+                |> setRoom
+                    (gameState.quest.rooms
+                        |> setHp newHp
+                    )
+            )
+
+
+combat : Int -> Int -> Int -> GameState -> List Msg
 combat firstUpdate everyNthUpdate updates gameState =
     let
         shouldUpdate =
@@ -141,18 +162,13 @@ combat firstUpdate everyNthUpdate updates gameState =
                 else
                     Player
 
-            _ =
-                Debug.log "newTurn" newTurn
+            newHp =
+                gameState.quest.rooms.currentHp - 1
         in
-        gameState
-            |> setQuest
-                (gameState.quest
-                    |> setRoom
-                        (gameState.quest.rooms
-                            |> setTurn newTurn
-                            |> setEnemyHp (gameState.quest.rooms.currentHp - 1)
-                        )
-                )
+        [ SetEnemyHp newHp
+        , SetText "hp" (String.fromInt newHp)
+        , SetTurn newTurn
+        ]
 
     else
-        gameState
+        []

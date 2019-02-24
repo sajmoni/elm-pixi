@@ -22,7 +22,7 @@ type alias Model =
     , interactions : List Interaction
     , appState : AppState
     , gameState : GameState
-    , gameStateUpdates : List (Int -> GameState -> GameState)
+    , gameStateUpdates : List (Int -> GameState -> List Msg)
     }
 
 
@@ -155,6 +155,20 @@ setTextColor id color entity =
             entity
 
 
+setText : Id -> String -> Entity -> Entity
+setText id text entity =
+    case entity of
+        Text basicData textData ->
+            if id == basicData.id then
+                Pixi.text basicData { textData | textString = text }
+
+            else
+                entity
+
+        _ ->
+            entity
+
+
 processInteraction : String -> String -> List Interaction -> List Msg
 processInteraction id event interactions =
     interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
@@ -182,9 +196,9 @@ initScene updates appState gameState model =
             Debug.todo "initScene" appState
 
 
-updateGameState : Int -> (Int -> GameState -> GameState) -> GameState -> GameState
-updateGameState updates gameStateUpdate gameState =
-    gameStateUpdate updates gameState
+updateGameState : Int -> GameState -> (Int -> GameState -> List Msg) -> List Msg -> List Msg
+updateGameState updates gameState gameStateUpdate messages =
+    messages |> List.append (gameStateUpdate updates gameState)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -219,13 +233,33 @@ update msg lastModel =
                         | entities = List.map (setTextColor id color) lastModel.entities
                     }
 
-                Tick delta ->
+                SetText id text ->
                     { lastModel
-                        | updates = lastModel.updates + 1
-                        , entities = updateEntities delta lastModel.updates lastModel.entities lastModel.behaviors
-                        , gameState =
+                        | entities = List.map (setText id text) lastModel.entities
+                    }
+
+                SetEnemyHp hp ->
+                    { lastModel
+                        | gameState = QuestModule.setEnemyHp hp lastModel.gameState
+                    }
+
+                SetTurn turn ->
+                    { lastModel
+                        | gameState = QuestModule.setTurn turn lastModel.gameState
+                    }
+
+                Tick delta ->
+                    let
+                        messages =
                             lastModel.gameStateUpdates
-                                |> List.foldl (updateGameState lastModel.updates) lastModel.gameState
+                                |> List.foldl (updateGameState lastModel.updates lastModel.gameState) []
+
+                        updatedModel =
+                            messages |> List.foldl (callUpdate update) lastModel
+                    in
+                    { updatedModel
+                        | updates = lastModel.updates + 1
+                        , entities = updateEntities delta lastModel.updates updatedModel.entities lastModel.behaviors
                     }
     in
     ( newModel

@@ -21,6 +21,9 @@ type Msg
     | RemoveEntity String
     | AddEntity Entity
     | SetTextColor Id String
+    | SetText Id String
+    | SetEnemyHp Int
+    | SetTurn Turn
     | Noop
     | ChangeAppState AppState
     | Tick Delta

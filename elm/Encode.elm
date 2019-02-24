@@ -35,7 +35,7 @@ encodeEntity entity =
             object
                 (List.append
                     (encodeBasicData basicData)
-                    [ ( "text", string textData.textString )
+                    [ ( "textString", string textData.textString )
                     , ( "textStyle"
                       , object
                             [ ( "fill", string textData.textStyle.fill )
