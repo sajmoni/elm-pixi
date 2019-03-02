@@ -1,6 +1,20 @@
-module Shared exposing (Behavior, Delta, GameState, GameStateUpdate, QuestType, Room, Turn(..))
+module Shared exposing (AppState(..), Behavior, Delta, EventData, GameState, Model, QuestType, Room, Turn(..))
 
-import Pixi exposing (BasicData, Entity)
+import Pixi exposing (..)
+
+
+type AppState
+    = Title
+    | Town
+    | Quest
+
+
+type alias Model =
+    { updates : Int
+    , behaviors : List Behavior
+    , appState : AppState
+    , gameState : GameState
+    }
 
 
 type alias Delta =
@@ -8,11 +22,13 @@ type alias Delta =
 
 
 type alias Behavior =
-    Delta -> Int -> BasicData -> BasicData
+    Delta -> Int -> GameState -> GameState
 
 
-type alias GameStateUpdate =
-    Int -> GameState -> GameState
+type alias EventData =
+    { msg : String
+    , value : String
+    }
 
 
 type Turn
@@ -22,7 +38,6 @@ type Turn
 
 type alias Room =
     { index : Int
-    , render : Entity
     , maxHp : Int
     , currentHp : Int
     , turn : Turn
@@ -36,4 +51,6 @@ type alias QuestType =
 
 type alias GameState =
     { quest : QuestType
+    , monsterX : Float
+    , textColor : String
     }

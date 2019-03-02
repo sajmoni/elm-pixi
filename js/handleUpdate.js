@@ -31,131 +31,181 @@ const PIXI_EVENTS = [
   // 'touchstart',
 ];
 
+const updateEntities = ({ entities, entityMap }) => {
+  entities
+    .filter(e => entityMap[e.id])
+    .forEach(({
+      id, x, y, scale, type, textStyle, textString,
+    }) => {
+      const e = entityMap[id];
+      if (type === 'AnimatedSprite') {
+        e.x = x;
+        e.y = y;
+        e.scale.set(scale);
+      }
+      if (type === 'Text') {
+        if (x) {
+          e.x = x;
+        }
+        if (y) {
+          e.y = y;
+        }
+        if (scale) {
+          e.scale.set(scale);
+        }
+        if (textStyle && textStyle.fill && textStyle.fill !== e.style.fill) {
+          e.style.fill = textStyle.fill;
+        }
+        if (e.text !== textString) {
+          e.text = textString;
+        }
+      }
+      if (type === 'Sprite') {
+        e.x = x;
+        e.y = y;
+        e.scale.set(scale);
+      }
+    });
+};
+
+const addAnimatedSprite = ({
+  entity, getTexture, incoming, addEntity,
+}) => {
+  const {
+    id, x, y, scale, textures, animationSpeed, on,
+  } = entity;
+  const animatedSprite = new PIXI.extras.AnimatedSprite(textures.map(getTexture));
+
+  animatedSprite.x = x;
+  animatedSprite.y = y;
+  animatedSprite.scale.set(scale);
+  animatedSprite.play();
+  animatedSprite.animationSpeed = animationSpeed;
+  animatedSprite.interactive = true;
+
+  console.log({ on });
+  addEntity(id, animatedSprite);
+};
+
+const addEntities = ({
+  entities, entityMap, addEntity, getTexture, incoming,
+}) => {
+  entities
+    .forEach((entity) => {
+      if (entityMap[entity.id]) {
+        return;
+      }
+      if (entity.type === 'AnimatedSprite') {
+        addAnimatedSprite({
+          entity,
+          getTexture,
+          incoming,
+        });
+      } else if (entity.type === 'Sprite') {
+        const {
+          id, x, y, scale, texture,
+        } = entity;
+        const sprite = new PIXI.Sprite(getTexture(texture));
+
+        sprite.x = x;
+        sprite.y = y;
+        sprite.scale.set(scale);
+        sprite.interactive = true;
+
+        PIXI_EVENTS.forEach((event) => {
+          sprite.on(event, () => {
+            incoming.send({ id, event });
+          });
+        });
+
+        addEntity(id, sprite);
+      } else if (entity.type === 'Text') {
+        const {
+          id, x, y, scale, textString, on,
+        } = entity;
+        const style = new PIXI.TextStyle({ fill: 'white', fontSize: 24 });
+        const text = new PIXI.Text(textString, style);
+        text.anchor.set(0.5);
+
+        if (x) {
+          text.x = x;
+        }
+        if (y) {
+          text.y = y;
+        }
+        if (scale) {
+          text.scale.set(scale);
+        }
+        text.interactive = true;
+        if (on) {
+          on.forEach(({ event, msg, value }) => {
+            console.log({ event });
+            text.on(event, () => {
+              const toSend = { msg, value };
+              incoming.send(toSend);
+            });
+          });
+        }
+        addEntity(id, text);
+      } else if (entity.type === 'Graphics') {
+        const {
+          id, x, y, scale, width, height, alpha, color, parent,
+        } = entity;
+        const graphics = new PIXI.Graphics();
+        graphics.x = x;
+        graphics.y = y;
+        graphics.scale.set(scale);
+        graphics.interactive = true;
+        PIXI_EVENTS.forEach((event) => {
+          graphics.on(event, () => {
+            incoming.send({ id, event });
+          });
+        });
+
+        graphics
+          .beginFill(0xffff00, alpha)
+          .drawRect(0, 0, width, height);
+        addEntity(id, graphics);
+      } else if (entity.type === 'Container') {
+        const {
+          id, x, y, scale, alpha,
+        } = entity;
+        const container = new PIXI.Container();
+        container.x = x;
+        container.y = y;
+        container.alpha = alpha;
+        container.scale.set(scale);
+        container.interactive = true;
+        PIXI_EVENTS.forEach((event) => {
+          container.on(event, () => {
+            incoming.send({ id, event });
+          });
+        });
+
+        addEntity(id, container, parent);
+      }
+    });
+};
+
+
+let flag = true;
 export default ({
   update, entityMap, addEntity, getTexture, incoming, removeEntity,
 }) => {
   update.subscribe((model) => {
-    // model
-    //   .filter(e => e.pixiType === 'Graphics')
-    //   .forEach(({
-    //     id, x, y, scale = 1,
-    //   }) => {
-    //     const e = entityMap[id];
-
-    //     e.clear()
-    //       .beginFill(0xffffff)
-    //       .drawRect(x, y, 100, 100)
-    //       .endFill()
-    //       .scale.set(scale);
-    //   });
-
+    if (flag) {
+      console.log(model);
+      flag = false;
+    }
     // Update entity
-    model
-      .filter(e => entityMap[e.id])
-      .forEach(({
-        id, x, y, scale, type, textStyle, textString,
-      }) => {
-        const e = entityMap[id];
-        if (type === 'AnimatedSprite') {
-          e.x = x;
-          e.y = y;
-          e.scale.set(scale);
-        }
-        if (type === 'Text') {
-          e.x = x;
-          e.y = y;
-          e.scale.set(scale);
-          if (textStyle && textStyle.fill && textStyle.fill !== e.style.fill) {
-            e.style.fill = textStyle.fill;
-          }
-          if (e.text !== textString) {
-            e.text = textString;
-          }
-        }
-      });
+    updateEntities({ entities: model, entityMap });
 
-    // Add Entities that are new
-    model
-      .forEach((e) => {
-        if (entityMap[e.id]) {
-          return;
-        }
-        if (e.type === 'AnimatedSprite') {
-          const {
-            id, x, y, scale, textures, animationSpeed,
-          } = e;
-          const animatedSprite = new PIXI.extras.AnimatedSprite(textures.map(getTexture));
+    // ADD Entities that are new
+    addEntities({
+      entities: model, entityMap, addEntity, getTexture, incoming,
+    });
 
-          animatedSprite.x = x;
-          animatedSprite.y = y;
-          animatedSprite.scale.set(scale);
-          animatedSprite.play();
-          animatedSprite.animationSpeed = animationSpeed;
-          animatedSprite.interactive = true;
-
-          PIXI_EVENTS.forEach((event) => {
-            animatedSprite.on(event, () => {
-              incoming.send({ id, event });
-            });
-          });
-
-          addEntity(id, animatedSprite);
-        } else if (e.type === 'Sprite') {
-          const {
-            id, x, y, scale, texture,
-          } = e;
-          const sprite = new PIXI.Sprite(getTexture(texture));
-
-          sprite.x = x;
-          sprite.y = y;
-          sprite.scale.set(scale);
-          sprite.interactive = true;
-
-          PIXI_EVENTS.forEach((event) => {
-            sprite.on(event, () => {
-              incoming.send({ id, event });
-            });
-          });
-
-          addEntity(id, sprite);
-        } else if (e.type === 'Text') {
-          const {
-            id, x, y, scale, textString,
-          } = e;
-          const style = new PIXI.TextStyle({ fill: 'white', fontSize: 24 });
-          const text = new PIXI.Text(textString, style);
-          text.anchor.set(0.5);
-          text.x = x;
-          text.y = y;
-          text.scale.set(scale);
-          text.interactive = true;
-          PIXI_EVENTS.forEach((event) => {
-            text.on(event, () => {
-              incoming.send({ id, event });
-            });
-          });
-          addEntity(id, text);
-        } else if (e.type === 'Graphics') {
-          const {
-            id, x, y, scale, width, height, alpha, color,
-          } = e;
-          const graphics = new PIXI.Graphics();
-          graphics.x = x;
-          graphics.y = y;
-          graphics.scale.set(scale);
-          graphics.interactive = true;
-          PIXI_EVENTS.forEach((event) => {
-            graphics.on(event, () => {
-              incoming.send({ id, event });
-            });
-          });
-
-          graphics
-            .beginFill(0xffff00, alpha)
-            .drawRect(0, 0, width, height);
-          addEntity(id, graphics);
-        }
-      });
+    // Remove entity if it doesn't exist in Elm anymore
     Object.keys(entityMap).forEach((id) => {
       const exists = model.map(m => m.id).includes(id);
       if (!exists) {

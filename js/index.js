@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { ArgumentOutOfRangeError } from 'rxjs';
 import makeGetTexture from './util/getTexture';
 import handleUpdate from './handleUpdate';
 
@@ -24,9 +25,9 @@ const getTexture = makeGetTexture(app);
 
 const entityMap = {};
 
-const addEntity = (id, entity) => {
+const addEntity = (id, entity, parent = app.stage) => {
   entityMap[id] = entity;
-  app.stage.addChild(entity);
+  parent.addChild(entity);
 };
 
 const removeEntity = (id) => {
@@ -46,8 +47,6 @@ const init = () => {
   } = Elm.Main.init({
     node: document.getElementById('elm'),
   });
-
-  // handleInit(initPort, addEntity, getTexture);
 
   handleUpdate({
     update, entityMap, addEntity, getTexture, incoming, removeEntity,

@@ -1,77 +1,142 @@
-module Encode exposing (encodeEntities, encodeEntity)
+module Encode exposing (encodeEntities)
 
-import Json.Encode exposing (..)
+import Json.Encode as E
+import Msg exposing (..)
 import Pixi exposing (..)
+import Shared exposing (..)
 
 
-encodeEntities : List Entity -> Value
+encodeEntities : List (Entity Msg) -> E.Value
 encodeEntities =
-    list encodeEntity
+    E.list encodeEntity
 
 
-encodeBasicData : BasicData -> List ( String, Value )
-encodeBasicData basicData =
-    [ ( "id", string basicData.id )
-    , ( "x", float basicData.x )
-    , ( "y", float basicData.y )
-    , ( "scale", float (Maybe.withDefault 1 basicData.scale) )
-    , ( "alpha", float (Maybe.withDefault 1 basicData.alpha) )
-    ]
+isOn : Attribute Msg -> Bool
+isOn attribute =
+    case attribute of
+        On _ _ ->
+            True
+
+        _ ->
+            False
 
 
-encodeShape : Shape -> List ( String, Value )
-encodeShape shape =
-    case shape of
-        Rectangle width height ->
-            [ ( "width", int width )
-            , ( "height", int height )
-            ]
+combineLists : ( List ( String, E.Value ), List ( String, E.Value ) ) -> List ( String, E.Value )
+combineLists ( list1, list2 ) =
+    List.append list1 list2
 
 
-encodeEntity : Entity -> Value
+encodeEntity : Entity Msg -> E.Value
 encodeEntity entity =
     case entity of
-        Text basicData textData ->
-            object
-                (List.append
-                    (encodeBasicData basicData)
-                    [ ( "textString", string textData.textString )
-                    , ( "textStyle"
-                      , object
-                            [ ( "fill", string textData.textStyle.fill )
-                            ]
-                      )
-                    , ( "type", string "Text" )
-                    ]
+        Text attributes children ->
+            E.object
+                (( "type", E.string "Text" )
+                    :: encode attributes
                 )
 
-        AnimatedSprite basicData textData ->
-            object
-                (List.append
-                    (encodeBasicData basicData)
-                    [ ( "textures", list string textData.textures )
-                    , ( "animationSpeed", float (Maybe.withDefault 0.05 textData.animationSpeed) )
-                    , ( "type", string "AnimatedSprite" )
-                    ]
+        Container attributes children ->
+            E.object
+                (( "type", E.string "Container" )
+                    :: encode attributes
                 )
 
-        Sprite basicData spriteData ->
-            object
-                (List.append
-                    (encodeBasicData basicData)
-                    [ ( "texture", string spriteData.texture )
-                    , ( "type", string "Sprite" )
-                    ]
+        AnimatedSprite attributes children ->
+            E.object
+                (( "type", E.string "AnimatedSprite" )
+                    :: encode attributes
                 )
 
-        Graphics basicData graphicsData ->
-            object
-                (encodeShape graphicsData.shape
-                    ++ encodeBasicData basicData
-                    ++ [ ( "color", string graphicsData.color )
-                       , ( "type", string "Graphics" )
-                       ]
+        Sprite attributes children ->
+            E.object
+                (( "type", E.string "Sprite" )
+                    :: encode attributes
                 )
 
         _ ->
-            Debug.todo "No JSON encoding for other entity types"
+            Debug.todo "encoding failed"
+
+
+encode : List (Attribute Msg) -> List ( String, E.Value )
+encode attributes =
+    attributes
+        |> List.partition isOn
+        |> Tuple.mapBoth encodeOns (List.map encodeAttribute)
+        |> combineLists
+
+
+getEncodedMessage : String -> String -> String -> List ( String, E.Value )
+getEncodedMessage event msg value =
+    [ ( "event", E.string event ), ( "msg", E.string msg ), ( "value", E.string value ) ]
+
+
+encodeOns : List (Attribute Msg) -> List ( String, E.Value )
+encodeOns attributes =
+    [ ( "on", E.list encodeOn attributes ) ]
+
+
+
+-- E.list encodedAttributes
+
+
+encodeOn : Attribute Msg -> E.Value
+encodeOn attribute =
+    case attribute of
+        On event msg ->
+            case msg of
+                ChangeAppState appState ->
+                    case appState of
+                        Quest ->
+                            E.object (getEncodedMessage event "ChangeAppState" "Quest")
+
+                        _ ->
+                            Debug.todo "encode more messages"
+
+                SetTextColor color ->
+                    E.object (getEncodedMessage event "SetTextColor" color)
+
+                _ ->
+                    Debug.todo "encode more messages"
+
+        _ ->
+            Debug.todo "This should never happen"
+
+
+encodeTextStyle : TextStyle -> ( String, E.Value )
+encodeTextStyle textStyle =
+    case textStyle of
+        Fill color ->
+            ( "fill", E.string color )
+
+
+
+-- _ ->
+--     Debug.todo "add more textstyle"
+
+
+encodeAttribute : Attribute Msg -> ( String, E.Value )
+encodeAttribute attribute =
+    case attribute of
+        Id id ->
+            ( "id", E.string id )
+
+        Scale scale ->
+            ( "scale", E.float scale )
+
+        X x ->
+            ( "x", E.float x )
+
+        Y y ->
+            ( "y", E.float y )
+
+        TextString string ->
+            ( "textString", E.string string )
+
+        TextStyle textStyles ->
+            ( "textStyle", E.object (List.map encodeTextStyle textStyles) )
+
+        Texture string ->
+            ( "texture", E.string string )
+
+        _ ->
+            Debug.todo "encode attribute failed"
