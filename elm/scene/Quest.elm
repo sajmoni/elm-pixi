@@ -5,23 +5,27 @@ import Pixi exposing (..)
 import Shared exposing (..)
 
 
+render : Model -> List (Entity Msg)
 render model =
     monster model :: inventory model ++ skills model ++ healthBars model
 
 
+healthBars : Model -> List (Entity Msg)
 healthBars model =
-    [ Pixi.graphics [ id "healthBarEnemy", x 50, y 280, color "red", shape (Rectangle 250 25) ]
+    [ Pixi.graphics [ id "healthBarEnemy", x 250, y 280, color "red", shape (Rectangle 250 25) ]
         []
     , Pixi.text
-        [ id "hpEnemy", x 400, y 400, textString (String.fromInt model.gameState.quest.rooms.currentHp), textStyle [ fill "white", fontSize 12 ] ]
+        [ id "hpEnemy", x 500, y 280, textString (String.fromInt model.gameState.quest.rooms.currentHp), textStyle [ fill "white", fontSize 12 ] ]
         []
     ]
 
 
+monster : Model -> Entity Msg
 monster model =
-    Pixi.animatedSprite [ id "enemy", x 500, y 100, scale 4, textures model.gameState.quest.rooms.textures, animationSpeed 0.02 ] []
+    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures model.gameState.quest.rooms.textures, animationSpeed 0.02 ] []
 
 
+inventory : Model -> List (Entity Msg)
 inventory model =
     [ Pixi.sprite [ id "helmetSlot", x skillStartPositionX, y inventoryStartPositionY, scale 4, texture "equipment_29" ] []
     , Pixi.sprite [ id "bodySlot", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 4, texture "equipment_25" ] []
@@ -31,6 +35,7 @@ inventory model =
     ]
 
 
+skills : Model -> List (Entity Msg)
 skills model =
     [ Pixi.sprite [ id "skill1", x skillStartPositionX, y skillStartPositionY, scale 4, texture "skill_001", on "click" DealDamage ] []
     , Pixi.sprite [ id "skill2", x (skillStartPositionX + skillWidth), y skillStartPositionY, scale 4, texture "skill_002" ] []
