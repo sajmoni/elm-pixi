@@ -8,7 +8,7 @@ import Shared exposing (..)
 
 stringDecoder : String -> D.Decoder String
 stringDecoder field =
-    D.field field D.string
+    D.field field (D.oneOf [ D.string, D.null "" ])
 
 
 decodePixiEvent : D.Value -> Msg
@@ -17,13 +17,10 @@ decodePixiEvent value =
         decoder =
             D.map2 EventData msgDecoder valueDecoder
 
-        foo =
+        decodedValue =
             D.decodeValue decoder value
-
-        _ =
-            Debug.log "foo" foo
     in
-    case foo of
+    case decodedValue of
         Ok event ->
             case event.msg of
                 "ChangeAppState" ->
@@ -36,6 +33,9 @@ decodePixiEvent value =
 
                 "SetTextColor" ->
                     SetTextColor event.value
+
+                "DealDamage" ->
+                    DealDamage
 
                 _ ->
                     Debug.todo "crash 123"

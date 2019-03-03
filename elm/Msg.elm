@@ -5,9 +5,7 @@ import Shared exposing (..)
 
 
 type Msg
-    = SetEnemyHp Int
-    | SetTurn Turn
-    | Noop
+    = Noop
     | ChangeAppState AppState
     | SetTextColor String
     | DealDamage

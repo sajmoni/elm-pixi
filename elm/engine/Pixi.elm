@@ -1,20 +1,20 @@
-module Pixi exposing (Attribute(..), Entity(..), Height, TextStyle(..), Width, alpha, animatedSprite, container, fill, graphics, id, on, scale, sprite, text, textString, textStyle, texture, x, y)
+module Pixi exposing (Attribute(..), Entity(..), Height, Shape(..), TextStyle(..), Width, alpha, animatedSprite, animationSpeed, color, container, fill, fontSize, graphics, id, on, scale, shape, sprite, text, textString, textStyle, texture, textures, x, y)
 
 -- Pixi.Attribute
 -- Pixi.TextStyle
 
 
 type alias Width =
-    Int
+    Float
 
 
 type alias Height =
-    Int
+    Float
 
 
-
--- type Shape
---     = Rectangle Width Height
+type Shape
+    = Rectangle Width Height
+    | Circle
 
 
 type Entity msg
@@ -35,6 +35,8 @@ type Attribute msg
     | TextString String
     | Texture String
     | Anchor Float
+    | Color String
+    | Shape Shape
     | On String msg
     | Textures (List String)
     | AnimationSpeed Float
@@ -71,17 +73,43 @@ texture string =
     Texture string
 
 
+textures : List String -> Attribute msg
+textures t =
+    Textures t
+
+
+animationSpeed : Float -> Attribute msg
+animationSpeed speed =
+    AnimationSpeed speed
+
+
+color : String -> Attribute msg
+color string =
+    Color string
+
+
+shape : Shape -> Attribute msg
+shape s =
+    Shape s
+
+
 
 -- TextStyle
 
 
 type TextStyle
     = Fill String
+    | FontSize Float
 
 
 fill : String -> TextStyle
 fill string =
     Fill string
+
+
+fontSize : Float -> TextStyle
+fontSize size =
+    FontSize size
 
 
 

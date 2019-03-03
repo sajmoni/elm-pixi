@@ -31,11 +31,7 @@ init _ =
                     , turn = Player
                     , currentHp = 100
                     , maxHp = 100
-
-                    -- , render =
-                    --     Pixi.animatedSprite
-                    --         { id = "test", x = 400, y = 140, scale = Just 8, alpha = Nothing }
-                    --         { textures = [ "monster_17", "monster_18" ], animationSpeed = Just 0.02 }
+                    , textures = [ "monster_17", "monster_18" ]
                     }
             }
 
@@ -50,10 +46,6 @@ init _ =
 
 
 
--- updateEntities : Delta -> Int -> List Entity -> List Behavior -> List Entity
--- updateEntities delta updates entities behaviors =
---     behaviors
---         |> List.foldl (runUpdates delta updates) entities
 -- runUpdates : Delta -> Int -> Behavior -> List Entity -> List Entity
 -- runUpdates delta updates behavior entities =
 --     List.map (updateEntity delta updates behavior) entities
@@ -89,46 +81,6 @@ init _ =
 --         False
 --     else
 --         True
--- Why is this even needed?? Must be a simpler way
-
-
-callUpdate : (Msg -> Model -> ( Model, Cmd Msg )) -> Msg -> Model -> Model
-callUpdate updateFn msg prevModel =
-    let
-        ( model, _ ) =
-            updateFn msg prevModel
-    in
-    model
-
-
-
--- setTextColor : Id -> String -> Entity -> Entity
--- setTextColor id color entity =
---     case entity of
---         Text basicData textData ->
---             let
---                 textStyle =
---                     textData.textStyle
---             in
---             if id == basicData.id then
---                 Pixi.text basicData { textData | textStyle = { textStyle | fill = color } }
---             else
---                 entity
---         _ ->
---             entity
--- setText : Id -> String -> Entity -> Entity
--- setText id text entity =
---     case entity of
---         Text basicData textData ->
---             if id == basicData.id then
---                 Pixi.text basicData { textData | textString = text }
---             else
---                 entity
---         _ ->
---             entity
--- processInteraction : String -> String -> List Interaction -> List Msg
--- processInteraction id event interactions =
---     interactions |> List.map (interactionOrNoop id event) |> List.filter (isNoop >> not)
 
 
 initScene : Int -> AppState -> GameState -> Model -> Model
@@ -141,17 +93,11 @@ initScene updates appState gameState model =
 
         Quest ->
             { model
-                | behaviors = QuestModule.behaviors
+                | behaviors = QuestModule.behaviors updates
             }
 
         _ ->
             Debug.todo "initScene" appState
-
-
-
--- updateGameState : Int -> GameState -> (Int -> GameState -> List Msg) -> List Msg -> List Msg
--- updateGameState updates gameState gameStateUpdate messages =
---     messages |> List.append (gameStateUpdate updates gameState)
 
 
 updateGameState : Delta -> Int -> GameState -> List Behavior -> GameState
@@ -185,16 +131,6 @@ update msg lastModel =
                     }
                         |> initScene lastModel.updates appState lastModel.gameState
 
-                SetEnemyHp hp ->
-                    { lastModel
-                        | gameState = QuestModule.setEnemyHp hp lastModel.gameState
-                    }
-
-                SetTurn turn ->
-                    { lastModel
-                        | gameState = QuestModule.setTurn turn lastModel.gameState
-                    }
-
                 SetTextColor color ->
                     { lastModel
                         | gameState = setTextColor color lastModel.gameState
@@ -206,13 +142,6 @@ update msg lastModel =
                     }
 
                 Tick delta ->
-                    -- let
-                    -- messages =
-                    --     lastModel.gameStateUpdates
-                    -- |> List.foldl (updateGameState lastModel.updates lastModel.gameState) []
-                    -- updatedModel =
-                    --     messages |> List.foldl (callUpdate update) lastModel
-                    -- in
                     { lastModel
                         | updates = lastModel.updates + 1
                         , gameState = lastModel.behaviors |> updateGameState delta lastModel.updates lastModel.gameState

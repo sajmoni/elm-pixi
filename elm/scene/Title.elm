@@ -11,12 +11,6 @@ behaviors =
     ]
 
 
-
--- [ moveRight "monster1"
--- , updateScale sine "text1" 4
--- ]
-
-
 moveRight : Behavior
 moveRight delta updates gameState =
     { gameState | monsterX = gameState.monsterX + (10 / delta) }
@@ -39,16 +33,3 @@ render model =
         [ id "startButton", x 300, y 600, scale 1, textString "Touch to start!", on "click" (ChangeAppState Quest), on "mouseover" (SetTextColor "yellow"), textStyle [ fill model.gameState.textColor ] ]
         []
     ]
-
-
-
--- Interactions
--- interactions : List Interaction
--- interactions =
---     [ changeAppState "startButton" "click"
---     , Interaction "startButton" "click" (RemoveEntity "monster1")
---     , makeSetTextColor "red" "startButton" "mouseover"
---     , makeSetTextColor "yellow" "startButton" "mouseout"
---     -- , createEntity "startButton" "click"
---     , makeSetTextColor "red" "startButton" "click"
---     ]

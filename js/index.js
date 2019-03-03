@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js';
-import { ArgumentOutOfRangeError } from 'rxjs';
 import makeGetTexture from './util/getTexture';
 import handleUpdate from './handleUpdate';
 

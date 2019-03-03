@@ -1,35 +1,46 @@
 import * as PIXI from 'pixi.js';
 // import _ from 'lodash/fp';
 
-const PIXI_EVENTS = [
-  // 'added',
-  'click',
-  // 'mousedown',
-  // 'mousemove',
-  'mouseout',
-  'mouseover',
-  // 'mouseup',
-  // 'mouseupoutside',
-  // 'pointercancel',
-  // 'pointerdown',
-  // 'pointermove',
-  // 'pointerout',
-  // 'pointerover',
-  // 'pointertap',
-  // 'pointerup',
-  // 'pointerupoutside',
-  // 'removed',
-  // 'rightclick',
-  // 'rightdown',
-  // 'rightup',
-  // 'rightupoutside',
-  // 'tap',
-  // 'touchcancel',
-  // 'touchend',
-  // 'touchendoutside',
-  // 'touchmove',
-  // 'touchstart',
-];
+// const PIXI_EVENTS = [
+//   // 'added',
+//   'click',
+//   // 'mousedown',
+//   // 'mousemove',
+//   'mouseout',
+//   'mouseover',
+//   // 'mouseup',
+//   // 'mouseupoutside',
+//   // 'pointercancel',
+//   // 'pointerdown',
+//   // 'pointermove',
+//   // 'pointerout',
+//   // 'pointerover',
+//   // 'pointertap',
+//   // 'pointerup',
+//   // 'pointerupoutside',
+//   // 'removed',
+//   // 'rightclick',
+//   // 'rightdown',
+//   // 'rightup',
+//   // 'rightupoutside',
+//   // 'tap',
+//   // 'touchcancel',
+//   // 'touchend',
+//   // 'touchendoutside',
+//   // 'touchmove',
+//   // 'touchstart',
+// ];
+
+const handleOn = ({ on, entity, incoming }) => {
+  if (on) {
+    on.forEach(({ event, msg, value }) => {
+      entity.on(event, () => {
+        const toSend = { msg, value };
+        incoming.send(toSend);
+      });
+    });
+  }
+};
 
 const updateEntities = ({ entities, entityMap }) => {
   entities
@@ -83,7 +94,7 @@ const addAnimatedSprite = ({
   animatedSprite.animationSpeed = animationSpeed;
   animatedSprite.interactive = true;
 
-  console.log({ on });
+  handleOn({ on, entity: animatedSprite, incoming });
   addEntity(id, animatedSprite);
 };
 
@@ -100,10 +111,11 @@ const addEntities = ({
           entity,
           getTexture,
           incoming,
+          addEntity,
         });
       } else if (entity.type === 'Sprite') {
         const {
-          id, x, y, scale, texture,
+          id, x, y, scale, texture, on,
         } = entity;
         const sprite = new PIXI.Sprite(getTexture(texture));
 
@@ -112,11 +124,7 @@ const addEntities = ({
         sprite.scale.set(scale);
         sprite.interactive = true;
 
-        PIXI_EVENTS.forEach((event) => {
-          sprite.on(event, () => {
-            incoming.send({ id, event });
-          });
-        });
+        handleOn({ on, entity: sprite, incoming });
 
         addEntity(id, sprite);
       } else if (entity.type === 'Text') {
@@ -137,38 +145,35 @@ const addEntities = ({
           text.scale.set(scale);
         }
         text.interactive = true;
-        if (on) {
-          on.forEach(({ event, msg, value }) => {
-            console.log({ event });
-            text.on(event, () => {
-              const toSend = { msg, value };
-              incoming.send(toSend);
-            });
-          });
-        }
+        handleOn({ on, entity: text, incoming });
+
         addEntity(id, text);
       } else if (entity.type === 'Graphics') {
         const {
-          id, x, y, scale, width, height, alpha, color, parent,
+          id, x, y, scale, shape, alpha, color, parent, on,
         } = entity;
         const graphics = new PIXI.Graphics();
-        graphics.x = x;
-        graphics.y = y;
-        graphics.scale.set(scale);
+        if (x) {
+          graphics.x = x;
+        }
+        if (y) {
+          graphics.y = y;
+        }
+        if (scale) {
+          graphics.scale.set(scale);
+        }
         graphics.interactive = true;
-        PIXI_EVENTS.forEach((event) => {
-          graphics.on(event, () => {
-            incoming.send({ id, event });
-          });
-        });
+
+        handleOn({ on, entity: graphics, incoming });
 
         graphics
-          .beginFill(0xffff00, alpha)
-          .drawRect(0, 0, width, height);
+          .beginFill(0xffff00, 1)
+          .drawRect(0, 0, shape.width, shape.height)
+          .endFill();
         addEntity(id, graphics);
       } else if (entity.type === 'Container') {
         const {
-          id, x, y, scale, alpha,
+          id, x, y, scale, alpha, on,
         } = entity;
         const container = new PIXI.Container();
         container.x = x;
@@ -176,11 +181,8 @@ const addEntities = ({
         container.alpha = alpha;
         container.scale.set(scale);
         container.interactive = true;
-        PIXI_EVENTS.forEach((event) => {
-          container.on(event, () => {
-            incoming.send({ id, event });
-          });
-        });
+
+        handleOn({ on, entity: container, incoming });
 
         addEntity(id, container, parent);
       }

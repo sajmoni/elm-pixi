@@ -53,6 +53,12 @@ encodeEntity entity =
                     :: encode attributes
                 )
 
+        Graphics attributes children ->
+            E.object
+                (( "type", E.string "Graphics" )
+                    :: encode attributes
+                )
+
         _ ->
             Debug.todo "encoding failed"
 
@@ -65,9 +71,18 @@ encode attributes =
         |> combineLists
 
 
-getEncodedMessage : String -> String -> String -> List ( String, E.Value )
+getEncodedMessage : String -> String -> Maybe String -> List ( String, E.Value )
 getEncodedMessage event msg value =
-    [ ( "event", E.string event ), ( "msg", E.string msg ), ( "value", E.string value ) ]
+    let
+        encodedValue =
+            case value of
+                Just string ->
+                    E.string string
+
+                Nothing ->
+                    E.null
+    in
+    [ ( "event", E.string event ), ( "msg", E.string msg ), ( "value", encodedValue ) ]
 
 
 encodeOns : List (Attribute Msg) -> List ( String, E.Value )
@@ -87,13 +102,16 @@ encodeOn attribute =
                 ChangeAppState appState ->
                     case appState of
                         Quest ->
-                            E.object (getEncodedMessage event "ChangeAppState" "Quest")
+                            E.object (getEncodedMessage event "ChangeAppState" (Just "Quest"))
 
                         _ ->
                             Debug.todo "encode more messages"
 
                 SetTextColor color ->
-                    E.object (getEncodedMessage event "SetTextColor" color)
+                    E.object (getEncodedMessage event "SetTextColor" (Just color))
+
+                DealDamage ->
+                    E.object (getEncodedMessage event "DealDamage" Nothing)
 
                 _ ->
                     Debug.todo "encode more messages"
@@ -108,10 +126,18 @@ encodeTextStyle textStyle =
         Fill color ->
             ( "fill", E.string color )
 
+        FontSize size ->
+            ( "fontSize", E.float size )
+
 
 
 -- _ ->
 --     Debug.todo "add more textstyle"
+
+
+encodeString : String -> E.Value
+encodeString string =
+    E.string string
 
 
 encodeAttribute : Attribute Msg -> ( String, E.Value )
@@ -138,5 +164,31 @@ encodeAttribute attribute =
         Texture string ->
             ( "texture", E.string string )
 
+        Textures textures ->
+            ( "textures", E.list encodeString textures )
+
+        AnimationSpeed speed ->
+            ( "animationSpeed", E.float speed )
+
+        Color color ->
+            ( "color", E.string color )
+
+        Shape s ->
+            ( "shape", encodeShape s )
+
         _ ->
             Debug.todo "encode attribute failed"
+
+
+encodeShape : Shape -> E.Value
+encodeShape shape =
+    case shape of
+        Rectangle width height ->
+            E.object
+                [ ( "width", E.float width )
+                , ( "height", E.float height )
+                , ( "type", E.string "Rectangle" )
+                ]
+
+        _ ->
+            Debug.todo "handle more shapes when encoding"

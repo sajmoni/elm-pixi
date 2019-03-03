@@ -41,6 +41,7 @@ type alias Room =
     , maxHp : Int
     , currentHp : Int
     , turn : Turn
+    , textures : List String
     }
 
 
