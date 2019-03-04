@@ -101,17 +101,23 @@ encodeOn attribute =
             case msg of
                 ChangeAppState appState ->
                     case appState of
-                        Quest ->
+                        Quest _ ->
                             E.object (getEncodedMessage event "ChangeAppState" (Just "Quest"))
 
-                        _ ->
-                            Debug.todo "encode more messages"
+                        Town ->
+                            E.object (getEncodedMessage event "ChangeAppState" (Just "Town"))
+
+                        Title ->
+                            E.object (getEncodedMessage event "ChangeAppState" (Just "Title"))
 
                 SetTextColor color ->
                     E.object (getEncodedMessage event "SetTextColor" (Just color))
 
                 DealDamage ->
                     E.object (getEncodedMessage event "DealDamage" Nothing)
+
+                GenerateNewQuest ->
+                    E.object (getEncodedMessage event "GenerateNewQuest" Nothing)
 
                 _ ->
                     Debug.todo "encode more messages"

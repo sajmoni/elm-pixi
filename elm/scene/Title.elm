@@ -30,6 +30,6 @@ render model =
         [ id "sprite1", x model.gameState.monsterX, y 100, texture "monster_01", scale 2 ]
         []
     , Pixi.text
-        [ id "startButton", x 300, y 600, scale 1, textString "Touch to start!", on "click" (ChangeAppState Quest), on "mouseover" (SetTextColor "yellow"), textStyle [ fill model.gameState.textColor ] ]
+        [ id "startButton", x 300, y 600, scale 1, textString "Touch to start!", on "click" GenerateNewQuest, on "mouseover" (SetTextColor "yellow"), textStyle [ fill model.gameState.textColor ] ]
         []
     ]

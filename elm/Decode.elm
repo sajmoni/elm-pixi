@@ -25,8 +25,13 @@ decodePixiEvent value =
             case event.msg of
                 "ChangeAppState" ->
                     case event.value of
-                        "Quest" ->
-                            ChangeAppState Quest
+                        -- "Quest" ->
+                        --     ChangeAppState Quest
+                        "Title" ->
+                            ChangeAppState Town
+
+                        "Town" ->
+                            ChangeAppState Title
 
                         _ ->
                             Debug.todo "crash 456"
@@ -36,6 +41,9 @@ decodePixiEvent value =
 
                 "DealDamage" ->
                     DealDamage
+
+                "GenerateNewQuest" ->
+                    GenerateNewQuest
 
                 _ ->
                     Debug.todo "crash 123"

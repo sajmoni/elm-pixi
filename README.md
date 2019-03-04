@@ -18,8 +18,3 @@ Open three terminal windows and run:
 `yarn watch`
 
 `yarn elm` (Need to be run every time changes are made)
-
-TODO:
-
-Every 60 ticks, player or enemy does an action
-Initial action, remove 1 hp from the other one

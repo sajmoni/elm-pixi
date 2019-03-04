@@ -1,28 +1,34 @@
 module Quest exposing (behaviors, combat, dealDamage, healthBars, inventory, inventoryStartPositionY, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills)
 
+import Data exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
 import Shared exposing (..)
 
 
-render : Model -> List (Entity Msg)
-render model =
-    monster model :: inventory model ++ skills model ++ healthBars model
+render : Model -> Room -> List (Entity Msg)
+render model currentRoom =
+    monster currentRoom :: inventory model ++ skills model ++ healthBars currentRoom
 
 
-healthBars : Model -> List (Entity Msg)
-healthBars model =
-    [ Pixi.graphics [ id "healthBarEnemy", x 250, y 280, color "red", shape (Rectangle 250 25) ]
+getHealthBar : Room -> Entity Msg
+getHealthBar currentRoom =
+    Pixi.graphics [ id "healthBarEnemy", x 250, y 280, color "#ff0000", shape (Rectangle (2.5 * toFloat currentRoom.currentHp) 25) ]
         []
+
+
+healthBars : Room -> List (Entity Msg)
+healthBars currentRoom =
+    [ getHealthBar currentRoom
     , Pixi.text
-        [ id "hpEnemy", x 500, y 280, textString (String.fromInt model.gameState.quest.rooms.currentHp), textStyle [ fill "white", fontSize 12 ] ]
+        [ id "hpEnemy", x 500, y 280, textString (String.fromInt currentRoom.currentHp), textStyle [ fill "white", fontSize 12 ] ]
         []
     ]
 
 
-monster : Model -> Entity Msg
-monster model =
-    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures model.gameState.quest.rooms.textures, animationSpeed 0.02 ] []
+monster : Room -> Entity Msg
+monster currentRoom =
+    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.textures, animationSpeed 0.02 ] []
 
 
 inventory : Model -> List (Entity Msg)
@@ -113,17 +119,27 @@ dealDamage : GameState -> GameState
 dealDamage gameState =
     let
         quest =
-            gameState.quest
+            getQuest gameState
 
-        rooms =
-            quest.rooms
+        currentRoom =
+            quest.currentRoom
 
         newHp =
-            gameState.quest.rooms.currentHp - 10
+            quest.currentRoom.currentHp - 10
     in
     { gameState
-        | quest = { quest | rooms = { rooms | currentHp = newHp } }
+        | appState = Quest (QuestData quest.rooms { currentRoom | currentHp = newHp })
     }
+
+
+getQuest : GameState -> QuestData
+getQuest gameState =
+    case gameState.appState of
+        Quest questData ->
+            questData
+
+        _ ->
+            Debug.todo "getQuest crashed"
 
 
 combat : Int -> Int -> Behavior
@@ -134,24 +150,24 @@ combat firstUpdate everyNthUpdate delta updates gameState =
     in
     if shouldUpdate then
         let
+            quest =
+                getQuest gameState
+
             newTurn =
-                if gameState.quest.rooms.turn == Player then
+                if quest.currentRoom.turn == Player then
                     Enemy
 
                 else
                     Player
 
             newHp =
-                gameState.quest.rooms.currentHp - 1
+                quest.currentRoom.currentHp - 1
 
-            quest =
-                gameState.quest
-
-            rooms =
-                quest.rooms
+            currentRoom =
+                quest.currentRoom
         in
         { gameState
-            | quest = { quest | rooms = { rooms | currentHp = newHp, turn = newTurn } }
+            | appState = Quest (QuestData quest.rooms { currentRoom | currentHp = newHp, turn = newTurn })
         }
 
     else

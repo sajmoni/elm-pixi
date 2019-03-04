@@ -9,4 +9,6 @@ type Msg
     | ChangeAppState AppState
     | SetTextColor String
     | DealDamage
+    | NewQuestGenerated (List Int)
+    | GenerateNewQuest
     | Tick Delta

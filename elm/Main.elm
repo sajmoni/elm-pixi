@@ -1,6 +1,7 @@
 module Main exposing (init)
 
 import Browser.Events
+import Data exposing (..)
 import Decode exposing (..)
 import Encode exposing (..)
 import Json.Encode exposing (..)
@@ -10,6 +11,7 @@ import Pixi exposing (..)
 import Platform
 import Port
 import Quest as QuestModule
+import Random
 import Shared exposing (..)
 import Time
 import Title as TitleModule
@@ -24,77 +26,42 @@ init _ =
 
         gameState =
             { monsterX = 10
-            , textColor = "red"
-            , quest =
-                QuestType
-                    { index = 1
-                    , turn = Player
-                    , currentHp = 100
-                    , maxHp = 100
-                    , textures = [ "monster_17", "monster_18" ]
-                    }
+            , textColor = "#ff0000"
+            , mana = 100
+            , appState = Title
             }
 
         initialModel =
             { updates = 0
             , behaviors = behaviors
-            , appState = Title
             , gameState = gameState
             }
     in
     ( initialModel, Port.init (encodeEntities (view initialModel)) )
 
 
-
--- runUpdates : Delta -> Int -> Behavior -> List Entity -> List Entity
--- runUpdates delta updates behavior entities =
---     List.map (updateEntity delta updates behavior) entities
--- updateEntity : Delta -> Int -> Behavior -> Entity -> Entity
--- updateEntity delta updates behavior entity =
---     case entity of
---         AnimatedSprite basicData animatedSpriteData ->
---             Pixi.animatedSprite (behavior delta updates basicData) (AnimatedSpriteData animatedSpriteData.textures animatedSpriteData.animationSpeed)
---         Text basicData textData ->
---             Pixi.text (behavior delta updates basicData) (TextData textData.textString textData.textStyle)
---         _ ->
---             Debug.todo "Blah!"
--- interactionOrNoop : String -> String -> Interaction -> Msg
--- interactionOrNoop idToCheck eventToCheck { id, event, msg } =
---     if eventToCheck == event && idToCheck == id then
---         msg
---     else
---         Noop
--- isNoop : Msg -> Bool
--- isNoop msg =
---     case msg of
---         Noop ->
---             True
---         _ ->
---             False
--- removeEntity : String -> Entity -> Bool
--- removeEntity id entity =
---     let
---         basicData =
---             getBasicData entity
---     in
---     if basicData.id == id then
---         False
---     else
---         True
-
-
-initScene : Int -> AppState -> GameState -> Model -> Model
-initScene updates appState gameState model =
+initScene : Int -> AppState -> Model -> ( Model, Cmd Msg )
+initScene updates appState model =
+    let
+        gameState =
+            model.gameState
+    in
     case appState of
         Town ->
-            { model
+            ( { model
                 | behaviors = TownModule.behaviors
-            }
+                , gameState = { gameState | appState = appState }
+              }
+            , Cmd.none
+            )
 
-        Quest ->
-            { model
-                | behaviors = QuestModule.behaviors updates
-            }
+        Quest _ ->
+            ( { model
+                | behaviors = QuestModule.behaviors model.updates
+                , gameState = { gameState | appState = appState }
+              }
+            , Cmd.none
+            )
 
         _ ->
             Debug.todo "initScene" appState
@@ -117,38 +84,74 @@ setTextColor color gameState =
     }
 
 
+generateNewQuest : Model -> ( Model, Cmd Msg )
+generateNewQuest model =
+    ( model
+    , Random.generate NewQuestGenerated (Random.list 10 (Random.int 0 2))
+    )
+
+
+newQuestGenerated : List Int -> Model -> ( Model, Cmd Msg )
+newQuestGenerated list model =
+    let
+        gameState =
+            model.gameState
+
+        rooms =
+            getQuest list
+
+        currentRoom =
+            getCurrentRoom 0 rooms
+    in
+    case currentRoom of
+        Just room ->
+            initScene model.updates (Quest (QuestData rooms room)) model
+
+        Nothing ->
+            ( model, Cmd.none )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg lastModel =
     let
-        newModel =
+        ( newModel, commands ) =
             case msg of
                 Noop ->
-                    lastModel
+                    ( lastModel, Cmd.none )
 
                 ChangeAppState appState ->
-                    { lastModel
-                        | appState = appState
-                    }
-                        |> initScene lastModel.updates appState lastModel.gameState
+                    lastModel |> initScene lastModel.updates appState
 
                 SetTextColor color ->
-                    { lastModel
+                    ( { lastModel
                         | gameState = setTextColor color lastModel.gameState
-                    }
+                      }
+                    , Cmd.none
+                    )
 
                 DealDamage ->
-                    { lastModel
+                    ( { lastModel
                         | gameState = QuestModule.dealDamage lastModel.gameState
-                    }
+                      }
+                    , Cmd.none
+                    )
+
+                GenerateNewQuest ->
+                    generateNewQuest lastModel
+
+                NewQuestGenerated list ->
+                    newQuestGenerated list lastModel
 
                 Tick delta ->
-                    { lastModel
+                    ( { lastModel
                         | updates = lastModel.updates + 1
                         , gameState = lastModel.behaviors |> updateGameState delta lastModel.updates lastModel.gameState
-                    }
+                      }
+                    , Cmd.none
+                    )
     in
     ( newModel
-    , Port.update (encodeEntities (view newModel))
+    , Cmd.batch [ Port.update (encodeEntities (view newModel)), commands ]
     )
 
 
@@ -159,12 +162,12 @@ subscriptions model =
 
 view : Model -> List (Entity Msg)
 view model =
-    case model.appState of
+    case model.gameState.appState of
         Title ->
             TitleModule.render model
 
-        Quest ->
-            QuestModule.render model
+        Quest questData ->
+            QuestModule.render model questData.currentRoom
 
         _ ->
             Debug.todo "More views"

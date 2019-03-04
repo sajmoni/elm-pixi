@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import convertColorHex from './util/convertColorHex';
 // import _ from 'lodash/fp';
 
 // const PIXI_EVENTS = [
@@ -46,7 +47,7 @@ const updateEntities = ({ entities, entityMap }) => {
   entities
     .filter(e => entityMap[e.id])
     .forEach(({
-      id, x, y, scale, type, textStyle, textString,
+      id, x, y, scale, type, textStyle, textString, shape, color,
     }) => {
       const e = entityMap[id];
       if (type === 'AnimatedSprite') {
@@ -75,6 +76,22 @@ const updateEntities = ({ entities, entityMap }) => {
         e.x = x;
         e.y = y;
         e.scale.set(scale);
+      } else if (type === 'Graphics') {
+        if (x) {
+          e.x = x;
+        }
+        if (y) {
+          e.y = y;
+        }
+        if (scale) {
+          e.scale.set(scale);
+        }
+
+        e
+          .clear()
+          .beginFill(convertColorHex(color), 1)
+          .drawRect(0, 0, shape.width, shape.height)
+          .endFill();
       }
     });
 };
@@ -167,7 +184,7 @@ const addEntities = ({
         handleOn({ on, entity: graphics, incoming });
 
         graphics
-          .beginFill(0xffff00, 1)
+          .beginFill(convertColorHex(color), 1)
           .drawRect(0, 0, shape.width, shape.height)
           .endFill();
         addEntity(id, graphics);
