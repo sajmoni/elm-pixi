@@ -1,8 +1,14 @@
 body {
   background-color: rgb(94, 94, 94);
+  font-family: 'equipment';
 }
 
 #game * {
   height: 1136px;
   width: 640px;
+}
+
+@font-face {
+  font-family: 'equipment';
+  src: url('EquipmentPro.ttf');
 }

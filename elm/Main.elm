@@ -131,7 +131,7 @@ update msg lastModel =
 
                 DealDamage ->
                     ( { lastModel
-                        | gameState = QuestModule.dealDamage lastModel.gameState
+                        | gameState = lastModel.gameState |> QuestModule.dealDamage |> QuestModule.spendMana
                       }
                     , Cmd.none
                     )

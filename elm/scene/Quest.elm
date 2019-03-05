@@ -1,4 +1,4 @@
-module Quest exposing (behaviors, combat, dealDamage, healthBars, inventory, inventoryStartPositionY, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills)
+module Quest exposing (behaviors, combat, dealDamage, getHealthBar, getQuest, healthBars, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
 
 import Data exposing (..)
 import Msg exposing (..)
@@ -8,7 +8,7 @@ import Shared exposing (..)
 
 render : Model -> Room -> List (Entity Msg)
 render model currentRoom =
-    monster currentRoom :: inventory model ++ skills model ++ healthBars currentRoom
+    manaBar model.gameState.mana :: (monster currentRoom :: inventory model ++ skills model ++ healthBars currentRoom)
 
 
 getHealthBar : Room -> Entity Msg
@@ -24,6 +24,11 @@ healthBars currentRoom =
         [ id "hpEnemy", x 500, y 280, textString (String.fromInt currentRoom.currentHp), textStyle [ fill "white", fontSize 12 ] ]
         []
     ]
+
+
+manaBar : Int -> Entity Msg
+manaBar mana =
+    Pixi.graphics [ id "manaBar", x 50, y 700, color "#0000ff", shape (Rectangle (4 * toFloat mana) 25) ] []
 
 
 monster : Room -> Entity Msg
@@ -113,6 +118,11 @@ shouldExecuteUpdate firstUpdate everyNthUpdate currentUpdate =
 --                         |> setHp newHp
 --                     )
 --             )
+
+
+spendMana : GameState -> GameState
+spendMana gameState =
+    { gameState | mana = gameState.mana - 10 }
 
 
 dealDamage : GameState -> GameState

@@ -1,36 +1,5 @@
 import * as PIXI from 'pixi.js';
 import convertColorHex from './util/convertColorHex';
-// import _ from 'lodash/fp';
-
-// const PIXI_EVENTS = [
-//   // 'added',
-//   'click',
-//   // 'mousedown',
-//   // 'mousemove',
-//   'mouseout',
-//   'mouseover',
-//   // 'mouseup',
-//   // 'mouseupoutside',
-//   // 'pointercancel',
-//   // 'pointerdown',
-//   // 'pointermove',
-//   // 'pointerout',
-//   // 'pointerover',
-//   // 'pointertap',
-//   // 'pointerup',
-//   // 'pointerupoutside',
-//   // 'removed',
-//   // 'rightclick',
-//   // 'rightdown',
-//   // 'rightup',
-//   // 'rightupoutside',
-//   // 'tap',
-//   // 'touchcancel',
-//   // 'touchend',
-//   // 'touchendoutside',
-//   // 'touchmove',
-//   // 'touchstart',
-// ];
 
 const handleOn = ({ on, entity, incoming }) => {
   if (on) {
@@ -146,9 +115,13 @@ const addEntities = ({
         addEntity(id, sprite);
       } else if (entity.type === 'Text') {
         const {
-          id, x, y, scale, textString, on,
+          id, x, y, scale, textString, on, textStyle,
         } = entity;
-        const style = new PIXI.TextStyle({ fill: 'white', fontSize: 24 });
+        const style = new PIXI.TextStyle({
+          fill: (textStyle && textStyle.fill) || 'white',
+          fontSize: (textStyle && textStyle.fontSize) || 24,
+          fontFamily: 'equipment',
+        });
         const text = new PIXI.Text(textString, style);
         text.anchor.set(0.5);
 
@@ -182,7 +155,9 @@ const addEntities = ({
         graphics.interactive = true;
 
         handleOn({ on, entity: graphics, incoming });
-
+        if (!color) {
+          throw new Error(`Graphics with id: ${id} is missing color property`);
+        }
         graphics
           .beginFill(convertColorHex(color), 1)
           .drawRect(0, 0, shape.width, shape.height)
