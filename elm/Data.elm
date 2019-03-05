@@ -1,4 +1,4 @@
-module Data exposing (getCurrentRoom, getMonster, getQuest, getRoom, isCurrentRoom, monster0, monster1, monster2)
+module Data exposing (getCurrentRoom, getQuest, getRoom, mapQuest)
 
 import Shared exposing (..)
 
@@ -69,3 +69,13 @@ isCurrentRoom currentRoom room =
 
     else
         False
+
+
+mapQuest : (QuestData -> QuestData) -> AppState -> AppState
+mapQuest f appState =
+    case appState of
+        Quest questData ->
+            Quest (f questData)
+
+        _ ->
+            appState

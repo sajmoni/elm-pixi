@@ -24,12 +24,20 @@ getScale =
 render : Model -> List (Pixi.Entity Msg)
 render model =
     [ Pixi.text
-        [ id "text1", x 300, y 400, textString "ElmQuest", scale (getScale model.updates * 4) ]
+        [ id "text1", x 320, y 400, textString "ElmQuest", scale (getScale model.updates), textStyle [ fontSize 140 ] ]
         []
     , Pixi.sprite
         [ id "sprite1", x model.gameState.monsterX, y 100, texture "monster_01", scale 2 ]
         []
     , Pixi.text
-        [ id "startButton", x 300, y 600, scale 1, textString "Touch to start!", on "click" GenerateNewQuest, on "mouseover" (SetTextColor "yellow"), textStyle [ fill model.gameState.textColor ] ]
+        [ id "startButton"
+        , x 300
+        , y 600
+        , scale 1
+        , textString "Touch to start!"
+        , on "click" GenerateNewQuest
+        , on "mouseover" (SetTextColor "yellow")
+        , textStyle [ fill model.gameState.textColor, fontSize 60 ]
+        ]
         []
     ]

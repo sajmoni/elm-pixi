@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "elm": "elm make elm/Main.elm --output public/elm.js",
+    "elm": "elm make elm/Main.elm --output public/elm.js --debug",
     "watch": "watchify js/index.js -o public/bundle.js -t [ babelify ] --debug",
     "start": "http-server -p 8080"
   },

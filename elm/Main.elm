@@ -108,7 +108,7 @@ newQuestGenerated list model =
             initScene model.updates (Quest (QuestData rooms room)) model
 
         Nothing ->
-            ( model, Cmd.none )
+            Debug.todo "Handle reaching the last room"
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

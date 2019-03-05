@@ -12,17 +12,23 @@ const handleOn = ({ on, entity, incoming }) => {
   }
 };
 
-const updateEntities = ({ entities, entityMap }) => {
+const updateEntities = ({ entities, entityMap, getTexture }) => {
   entities
     .filter(e => entityMap[e.id])
     .forEach(({
-      id, x, y, scale, type, textStyle, textString, shape, color,
+      id, x, y, scale, type, textStyle, textString, shape, color, textures,
     }) => {
       const e = entityMap[id];
       if (type === 'AnimatedSprite') {
         e.x = x;
         e.y = y;
         e.scale.set(scale);
+        if (e.textureNames.some(tn => !textures.includes(tn))) {
+          console.log('new textures!!');
+          e.textureNames = textures;
+          e.textures = textures.map(getTexture);
+          e.play();
+        }
       }
       if (type === 'Text') {
         if (x) {
@@ -79,6 +85,7 @@ const addAnimatedSprite = ({
   animatedSprite.play();
   animatedSprite.animationSpeed = animationSpeed;
   animatedSprite.interactive = true;
+  animatedSprite.textureNames = textures;
 
   handleOn({ on, entity: animatedSprite, incoming });
   addEntity(id, animatedSprite);
@@ -192,7 +199,7 @@ export default ({
       flag = false;
     }
     // Update entity
-    updateEntities({ entities: model, entityMap });
+    updateEntities({ entities: model, entityMap, getTexture });
 
     // ADD Entities that are new
     addEntities({

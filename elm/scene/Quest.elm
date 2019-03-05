@@ -59,6 +59,7 @@ skills model =
 behaviors : Int -> List Behavior
 behaviors currentUpdate =
     [ combat currentUpdate 60
+    , checkIfPlayerDead
     ]
 
 
@@ -182,3 +183,36 @@ combat firstUpdate everyNthUpdate delta updates gameState =
 
     else
         gameState
+
+
+checkIfPlayerDead : Behavior
+checkIfPlayerDead delta updates gameState =
+    case gameState.appState of
+        Quest questData ->
+            if questData.currentRoom.currentHp > 0 then
+                gameState
+
+            else
+                { gameState | appState = mapQuest nextRoom gameState.appState }
+
+        _ ->
+            Debug.todo "Should never happen"
+
+
+nextRoom : QuestData -> QuestData
+nextRoom questData =
+    let
+        newRoom =
+            getCurrentRoom (questData.currentRoom.index + 1) questData.rooms
+
+        _ =
+            Debug.log "newROom" newRoom
+    in
+    case newRoom of
+        Just room ->
+            { questData
+                | currentRoom = room
+            }
+
+        Nothing ->
+            Debug.todo "handle no next room"
