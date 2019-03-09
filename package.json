@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "elm": "elm make elm/Main.elm --output public/elm.js --debug",
+    "elm": "chokidar '**/*.elm' -c 'elm make elm/Main.elm --output public/elm.js --debug' --initial",
     "watch": "watchify js/index.js -o public/bundle.js -t [ babelify ] --debug",
     "start": "http-server -p 8080"
   },
@@ -19,6 +19,7 @@
     "@babel/preset-env": "7.3.1",
     "babelify": "10.0.0",
     "browserify": "16.2.3",
+    "chokidar-cli": "1.2.2",
     "eslint": "5.13.0",
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-plugin-import": "2.16.0",
