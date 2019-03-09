@@ -1,5 +1,6 @@
 module Quest exposing (behaviors, combat, dealDamage, getHealthBar, getQuest, healthBars, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
 
+import Bar
 import Data exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
@@ -13,15 +14,19 @@ render model currentRoom =
 
 getHealthBar : Room -> Entity Msg
 getHealthBar currentRoom =
-    Pixi.graphics [ id "healthBarEnemy", x 250, y 280, color "#ff0000", shape (Rectangle (2.5 * toFloat currentRoom.currentHp) 25) ]
-        []
+    Bar.view "healthBarEnemey"
+        300
+        280
+        "#ff0000"
+        (toFloat currentRoom.currentHp)
+        (toFloat currentRoom.maxHp)
 
 
 healthBars : Room -> List (Entity Msg)
 healthBars currentRoom =
     [ getHealthBar currentRoom
     , Pixi.text
-        [ id "hpEnemy", x 500, y 280, textString (String.fromInt currentRoom.currentHp), textStyle [ fill "white", fontSize 12 ] ]
+        [ id "hpEnemy", x 400, y 295, textString (String.fromInt currentRoom.currentHp), textStyle [ fill "white", fontSize 24 ] ]
         []
     ]
 
@@ -79,46 +84,9 @@ inventoryStartPositionY =
     500
 
 
-
--- setTurn : Turn -> GameState -> GameState
--- setTurn turn gameState =
---     let
---         rooms =
---             gameState.quest.rooms
---     in
---     gameState
---         |> setQuest
---             (gameState.quest
---                 |> setRoom
---                     { rooms | turn = turn }
---             )
--- setQuest : QuestType -> GameState -> GameState
--- setQuest quest gameState =
---     { gameState | quest = quest }
--- setRoom : Room -> QuestType -> QuestType
--- setRoom room quest =
---     { quest | rooms = room }
--- setHp : Int -> Room -> Room
--- setHp hp room =
---     { room | currentHp = hp }
-
-
 shouldExecuteUpdate : Int -> Int -> Int -> Bool
 shouldExecuteUpdate firstUpdate everyNthUpdate currentUpdate =
     modBy everyNthUpdate (currentUpdate - firstUpdate) == 0
-
-
-
--- setEnemyHp : Int -> GameState -> GameState
--- setEnemyHp newHp gameState =
---     gameState
---         |> setQuest
---             (gameState.quest
---                 |> setRoom
---                     (gameState.quest.rooms
---                         |> setHp newHp
---                     )
---             )
 
 
 spendMana : GameState -> GameState
