@@ -161,6 +161,12 @@ encodeAttribute attribute =
         Y y ->
             ( "y", E.float y )
 
+        Anchor anchor ->
+            ( "anchor", E.float anchor )
+
+        Alpha alpha ->
+            ( "alpha", E.float alpha )
+
         TextString string ->
             ( "textString", E.string string )
 

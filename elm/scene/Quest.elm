@@ -9,7 +9,7 @@ import Shared exposing (..)
 
 render : Model -> Room -> List (Entity Msg)
 render model currentRoom =
-    manaBar model.gameState.mana :: (monster currentRoom :: inventory model ++ skills model ++ healthBars currentRoom)
+    manaBar model.gameState.mana :: (monster currentRoom :: inventorySlots model ++ skills model ++ healthBars currentRoom ++ inventory model.gameState.inventory)
 
 
 getHealthBar : Room -> Entity Msg
@@ -41,14 +41,51 @@ monster currentRoom =
     Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.textures, animationSpeed 0.02 ] []
 
 
-inventory : Model -> List (Entity Msg)
-inventory model =
-    [ Pixi.sprite [ id "helmetSlot", x skillStartPositionX, y inventoryStartPositionY, scale 4, texture "equipment_29" ] []
-    , Pixi.sprite [ id "bodySlot", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 4, texture "equipment_25" ] []
-    , Pixi.sprite [ id "accessorySlot", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 4, texture "equipment_29" ] []
-    , Pixi.sprite [ id "gloveSlot", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 4, texture "equipment_28" ] []
-    , Pixi.sprite [ id "weaponSlot", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 4, texture "equipment_33" ] []
+inventorySlots : Model -> List (Entity Msg)
+inventorySlots model =
+    [ Pixi.sprite [ id "helmetSlot", x skillStartPositionX, y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_29" ] []
+    , Pixi.sprite [ id "bodySlot", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_25" ] []
+    , Pixi.sprite [ id "accessorySlot", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_29" ] []
+    , Pixi.sprite [ id "gloveSlot", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_28" ] []
+    , Pixi.sprite [ id "weaponSlot", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_33" ] []
     ]
+
+
+inventory : Inventory -> List (Entity Msg)
+inventory i =
+    let
+        inventoryToRender =
+            []
+    in
+    []
+        |> renderEquipment i.weapon
+        |> renderEquipment i.helmet
+        |> renderEquipment i.accessory
+        |> renderEquipment i.glove
+        |> renderEquipment i.armor
+        |> List.filterMap identity
+
+
+renderEquipment : Equipment -> List (Maybe (Entity Msg)) -> List (Maybe (Entity Msg))
+renderEquipment eq list =
+    case eq of
+        Weapon image _ ->
+            Just (Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+
+        Helmet image ->
+            Just (Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture image ] []) :: list
+
+        Accessory image ->
+            Just (Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+
+        Armor image ->
+            Just (Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+
+        Glove image ->
+            Just (Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+
+        _ ->
+            Nothing :: list
 
 
 skills : Model -> List (Entity Msg)

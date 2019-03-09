@@ -29,6 +29,13 @@ init _ =
             , textColor = "#ff0000"
             , mana = 100
             , appState = Title
+            , inventory =
+                { weapon = Weapon "Weapon_01" 10
+                , helmet = Helmet "Weapon_02"
+                , armor = Armor "Weapon_03"
+                , glove = Glove "Weapon_04"
+                , accessory = Accessory "Weapon_05"
+                }
             }
 
         initialModel =

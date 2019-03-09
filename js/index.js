@@ -19,6 +19,7 @@ app.loader.add('spritesheet/food.json');
 app.loader.add('spritesheet/monster.json');
 app.loader.add('spritesheet/skill.json');
 app.loader.add('spritesheet/equipment.json');
+app.loader.add('spritesheet/weapons.json');
 
 const getTexture = makeGetTexture(app);
 

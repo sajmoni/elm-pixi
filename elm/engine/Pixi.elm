@@ -1,8 +1,5 @@
 module Pixi exposing (Attribute(..), Entity(..), Height, Shape(..), TextStyle(..), Width, alpha, animatedSprite, animationSpeed, color, container, fill, fontSize, graphics, id, on, scale, shape, sprite, text, textString, textStyle, texture, textures, x, y)
 
--- Pixi.Attribute
--- Pixi.TextStyle
-
 
 type alias Width =
     Float
@@ -46,6 +43,11 @@ type Attribute msg
 id : String -> Attribute msg
 id string =
     Id string
+
+
+anchor : Float -> Attribute msg
+anchor a =
+    Anchor a
 
 
 textString : String -> Attribute msg

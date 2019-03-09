@@ -108,12 +108,15 @@ const addEntities = ({
         });
       } else if (entity.type === 'Sprite') {
         const {
-          id, x, y, scale, texture, on,
+          id, x, y, scale, texture, on, alpha,
         } = entity;
         const sprite = new PIXI.Sprite(getTexture(texture));
 
         sprite.x = x;
         sprite.y = y;
+        if (alpha) {
+          sprite.alpha = alpha;
+        }
         sprite.scale.set(scale);
         sprite.interactive = true;
 

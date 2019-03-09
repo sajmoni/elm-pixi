@@ -1,4 +1,4 @@
-module Shared exposing (AppState(..), Behavior, Delta, EventData, GameState, Model, QuestData, Room, Turn(..))
+module Shared exposing (AppState(..), Behavior, Damage, Delta, Equipment(..), EventData, GameState, Inventory, Model, QuestData, Room, Turn(..))
 
 import Pixi exposing (..)
 
@@ -50,9 +50,32 @@ type alias QuestData =
     }
 
 
+type alias Damage =
+    Int
+
+
+type Equipment
+    = Weapon String Damage
+    | Armor String
+    | Glove String
+    | Accessory String
+    | Helmet String
+    | None
+
+
+type alias Inventory =
+    { helmet : Equipment
+    , armor : Equipment
+    , weapon : Equipment
+    , accessory : Equipment
+    , glove : Equipment
+    }
+
+
 type alias GameState =
     { monsterX : Float
     , textColor : String
     , mana : Int
+    , inventory : Inventory
     , appState : AppState
     }
