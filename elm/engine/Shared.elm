@@ -1,4 +1,4 @@
-module Shared exposing (AppState(..), Behavior, Damage, Delta, Equipment(..), EventData, GameState, Inventory, Model, QuestData, Room, Turn(..))
+module Shared exposing (AppState(..), Behavior, Damage, Delta, Enemy, Equipment(..), EventData, GameState, Inventory, Model, Player, QuestData, Room, Turn(..))
 
 import Pixi exposing (..)
 
@@ -31,15 +31,27 @@ type alias EventData =
 
 
 type Turn
-    = Player
-    | Enemy
+    = PlayerTurn
+    | EnemyTurn
 
 
 type alias Room =
     { index : Int
-    , maxHp : Int
-    , currentHp : Int
     , turn : Turn
+    , enemy : Enemy
+    }
+
+
+type alias Enemy =
+    { maxHp : Int
+    , currentHp : Int
+    , textures : List String
+    }
+
+
+type alias Player =
+    { maxHp : Int
+    , currentHp : Int
     , textures : List String
     }
 
@@ -47,6 +59,7 @@ type alias Room =
 type alias QuestData =
     { rooms : List Room
     , currentRoom : Room
+    , player : Player
     }
 
 

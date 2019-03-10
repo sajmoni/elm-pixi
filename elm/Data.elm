@@ -39,16 +39,19 @@ getMonster random =
             Debug.todo "Add more monsters!"
 
 
+getRoom : Int -> Int -> Room
 getRoom index random =
     let
         monster =
             getMonster random
     in
     { index = index
-    , turn = Player
-    , currentHp = monster.currentHp
-    , maxHp = monster.maxHp
-    , textures = monster.textures
+    , turn = PlayerTurn
+    , enemy =
+        { currentHp = monster.currentHp
+        , maxHp = monster.maxHp
+        , textures = monster.textures
+        }
     }
 
 

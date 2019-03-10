@@ -1,4 +1,4 @@
-module Quest exposing (behaviors, combat, dealDamage, getHealthBar, getQuest, healthBars, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
+module Quest exposing (behaviors, combat, dealDamage, getQuest, healthBars, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
 
 import Bar
 import Data exposing (..)
@@ -7,26 +7,26 @@ import Pixi exposing (..)
 import Shared exposing (..)
 
 
-render : Model -> Room -> List (Entity Msg)
-render model currentRoom =
-    manaBar model.gameState.mana :: (monster currentRoom :: inventorySlots model ++ skills model ++ healthBars currentRoom ++ inventory model.gameState.inventory)
+render : Model -> QuestData -> List (Entity Msg)
+render model quest =
+    manaBar model.gameState.mana :: (monster quest.currentRoom :: player quest.player :: inventorySlots model ++ skills model ++ healthBars quest.currentRoom ++ inventory model.gameState.inventory)
 
 
-getHealthBar : Room -> Entity Msg
-getHealthBar currentRoom =
+enemyHealthBar : Room -> Entity Msg
+enemyHealthBar currentRoom =
     Bar.view "healthBarEnemey"
         300
         280
         "#ff0000"
-        (toFloat currentRoom.currentHp)
-        (toFloat currentRoom.maxHp)
+        (toFloat currentRoom.enemy.currentHp)
+        (toFloat currentRoom.enemy.maxHp)
 
 
 healthBars : Room -> List (Entity Msg)
 healthBars currentRoom =
-    [ getHealthBar currentRoom
+    [ enemyHealthBar currentRoom
     , Pixi.text
-        [ id "hpEnemy", x 400, y 295, textString (String.fromInt currentRoom.currentHp), textStyle [ fill "white", fontSize 24 ] ]
+        [ id "hpEnemy", x 400, y 295, textString (String.fromInt currentRoom.enemy.currentHp), textStyle [ fill "white", fontSize 24 ] ]
         []
     ]
 
@@ -38,7 +38,12 @@ manaBar mana =
 
 monster : Room -> Entity Msg
 monster currentRoom =
-    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.textures, animationSpeed 0.02 ] []
+    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.enemy.textures, animationSpeed 0.02 ] []
+
+
+player : Player -> Entity Msg
+player p =
+    Pixi.animatedSprite [ id "player", x 100, y 100, scale 6, textures p.textures, animationSpeed 0.02 ] []
 
 
 inventorySlots : Model -> List (Entity Msg)
@@ -140,11 +145,19 @@ dealDamage gameState =
         currentRoom =
             quest.currentRoom
 
+        enemy =
+            currentRoom.enemy
+
         newHp =
-            quest.currentRoom.currentHp - 10
+            quest.currentRoom.enemy.currentHp - 10
     in
     { gameState
-        | appState = Quest (QuestData quest.rooms { currentRoom | currentHp = newHp })
+        | appState =
+            Quest
+                { rooms = quest.rooms
+                , player = quest.player
+                , currentRoom = { currentRoom | enemy = { enemy | currentHp = newHp } }
+                }
     }
 
 
@@ -170,20 +183,35 @@ combat firstUpdate everyNthUpdate delta updates gameState =
                 getQuest gameState
 
             newTurn =
-                if quest.currentRoom.turn == Player then
-                    Enemy
+                if quest.currentRoom.turn == PlayerTurn then
+                    EnemyTurn
 
                 else
-                    Player
+                    PlayerTurn
 
             newHp =
-                quest.currentRoom.currentHp - 1
+                quest.currentRoom.enemy.currentHp - 1
 
             currentRoom =
                 quest.currentRoom
+
+            enemy =
+                currentRoom.enemy
         in
         { gameState
-            | appState = Quest (QuestData quest.rooms { currentRoom | currentHp = newHp, turn = newTurn })
+            | appState =
+                Quest
+                    { rooms = quest.rooms
+                    , player = quest.player
+                    , currentRoom =
+                        { currentRoom
+                            | turn = newTurn
+                            , enemy =
+                                { enemy
+                                    | currentHp = newHp
+                                }
+                        }
+                    }
         }
 
     else
@@ -194,7 +222,7 @@ checkIfPlayerDead : Behavior
 checkIfPlayerDead delta updates gameState =
     case gameState.appState of
         Quest questData ->
-            if questData.currentRoom.currentHp > 0 then
+            if questData.currentRoom.enemy.currentHp > 0 then
                 gameState
 
             else

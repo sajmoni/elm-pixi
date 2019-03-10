@@ -20,6 +20,7 @@ app.loader.add('spritesheet/monster.json');
 app.loader.add('spritesheet/skill.json');
 app.loader.add('spritesheet/equipment.json');
 app.loader.add('spritesheet/weapons.json');
+app.loader.add('spritesheet/player.json');
 
 const getTexture = makeGetTexture(app);
 

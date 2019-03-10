@@ -109,10 +109,16 @@ newQuestGenerated list model =
 
         currentRoom =
             getCurrentRoom 0 rooms
+
+        player =
+            { maxHp = 100
+            , currentHp = 100
+            , textures = [ "player_01", "player_02" ]
+            }
     in
     case currentRoom of
         Just room ->
-            initScene model.updates (Quest (QuestData rooms room)) model
+            initScene model.updates (Quest { player = player, rooms = rooms, currentRoom = room }) model
 
         Nothing ->
             Debug.todo "Handle reaching the last room"
@@ -174,7 +180,7 @@ view model =
             TitleModule.render model
 
         Quest questData ->
-            QuestModule.render model questData.currentRoom
+            QuestModule.render model questData
 
         _ ->
             Debug.todo "More views"
