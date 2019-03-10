@@ -113,7 +113,7 @@ newQuestGenerated list model =
         player =
             { maxHp = 100
             , currentHp = 100
-            , textures = [ "player_01", "player_02" ]
+            , textures = [ "player_01", "player_02", "player_03", "player_04" ]
             }
     in
     case currentRoom of

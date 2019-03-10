@@ -1,4 +1,4 @@
-module Quest exposing (behaviors, combat, dealDamage, getQuest, healthBars, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
+module Quest exposing (behaviors, combat, dealDamage, getQuest, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
 
 import Bar
 import Data exposing (..)
@@ -9,12 +9,20 @@ import Shared exposing (..)
 
 render : Model -> QuestData -> List (Entity Msg)
 render model quest =
-    manaBar model.gameState.mana :: (monster quest.currentRoom :: player quest.player :: inventorySlots model ++ skills model ++ healthBars quest.currentRoom ++ inventory model.gameState.inventory)
+    manaBar model.gameState.mana
+        :: (monster quest.currentRoom
+                :: player quest.player
+                :: inventorySlots model
+                ++ skills model
+                ++ enemyHealth quest.currentRoom
+                ++ playerHealth quest.player
+                ++ inventory model.gameState.inventory
+           )
 
 
 enemyHealthBar : Room -> Entity Msg
 enemyHealthBar currentRoom =
-    Bar.view "healthBarEnemey"
+    Bar.view "healthBarEnemy"
         300
         280
         "#ff0000"
@@ -22,11 +30,40 @@ enemyHealthBar currentRoom =
         (toFloat currentRoom.enemy.maxHp)
 
 
-healthBars : Room -> List (Entity Msg)
-healthBars currentRoom =
+playerHealthBar : Player -> Entity Msg
+playerHealthBar p =
+    Bar.view "healthBarPlayer"
+        20
+        280
+        "#ff0000"
+        (toFloat p.currentHp)
+        (toFloat p.maxHp)
+
+
+enemyHealth : Room -> List (Entity Msg)
+enemyHealth currentRoom =
     [ enemyHealthBar currentRoom
     , Pixi.text
-        [ id "hpEnemy", x 400, y 295, textString (String.fromInt currentRoom.enemy.currentHp), textStyle [ fill "white", fontSize 24 ] ]
+        [ id "hpEnemy"
+        , x 400
+        , y 295
+        , textString (String.fromInt currentRoom.enemy.currentHp ++ " / " ++ String.fromInt currentRoom.enemy.maxHp)
+        , textStyle [ fill "white", fontSize 24 ]
+        ]
+        []
+    ]
+
+
+playerHealth : Player -> List (Entity Msg)
+playerHealth p =
+    [ playerHealthBar p
+    , Pixi.text
+        [ id "hpPlayer"
+        , x 100
+        , y 295
+        , textString (String.fromInt p.currentHp ++ " / " ++ String.fromInt p.maxHp)
+        , textStyle [ fill "white", fontSize 24 ]
+        ]
         []
     ]
 
@@ -38,12 +75,12 @@ manaBar mana =
 
 monster : Room -> Entity Msg
 monster currentRoom =
-    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.enemy.textures, animationSpeed 0.02 ] []
+    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.enemy.textures, animationSpeed 0.015 ] []
 
 
 player : Player -> Entity Msg
 player p =
-    Pixi.animatedSprite [ id "player", x 100, y 100, scale 6, textures p.textures, animationSpeed 0.02 ] []
+    Pixi.animatedSprite [ id "player", x 100, y 100, scale 6, textures p.textures, animationSpeed 0.015 ] []
 
 
 inventorySlots : Model -> List (Entity Msg)
