@@ -1,4 +1,4 @@
-module Model exposing (AccessoryData, AppState(..), ArmorData, Behavior, Damage, Delta, Enemy, Equipment(..), EventData, GameState, GloveData, HelmetData, Inventory, Model, Player, QuestData, Room, Turn(..), WeaponData)
+module Model exposing (Accessory, AppState(..), Armor, Behavior, Damage, Delta, Enemy, EventData, GameState, Glove, Helmet, Inventory, Model, Player, QuestData, Room, Turn(..), Weapon)
 
 import Pixi exposing (..)
 
@@ -68,47 +68,38 @@ type alias Damage =
     Int
 
 
-type alias WeaponData =
+type alias Weapon =
     { texture : String
     , damage : Int
     }
 
 
-type alias ArmorData =
+type alias Armor =
     { texture : String
     }
 
 
-type alias GloveData =
+type alias Glove =
     { texture : String
     }
 
 
-type alias AccessoryData =
+type alias Accessory =
     { texture : String
     }
 
 
-type alias HelmetData =
+type alias Helmet =
     { texture : String
     }
-
-
-type Equipment
-    = Weapon WeaponData
-    | Armor ArmorData
-    | Glove GloveData
-    | Accessory AccessoryData
-    | Helmet HelmetData
-    | None
 
 
 type alias Inventory =
-    { helmet : Equipment
-    , armor : Equipment
-    , weapon : Equipment
-    , accessory : Equipment
-    , glove : Equipment
+    { helmet : Maybe Helmet
+    , armor : Maybe Armor
+    , weapon : Maybe Weapon
+    , accessory : Maybe Accessory
+    , glove : Maybe Glove
     }
 
 

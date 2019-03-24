@@ -1,9 +1,9 @@
 module Armor exposing (armor1)
 
-import Model exposing (ArmorData)
+import Model exposing (Armor)
 
 
-armor1 : ArmorData
+armor1 : Armor
 armor1 =
     { texture = "Armor_01"
     }

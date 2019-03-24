@@ -1,9 +1,9 @@
 module Accessory exposing (accessory1)
 
-import Model exposing (AccessoryData)
+import Model exposing (Accessory)
 
 
-accessory1 : AccessoryData
+accessory1 : Accessory
 accessory1 =
     { texture = "Armor_20"
     }

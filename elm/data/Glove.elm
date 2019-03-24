@@ -1,9 +1,9 @@
 module Glove exposing (glove1)
 
-import Model exposing (GloveData)
+import Model exposing (Glove)
 
 
-glove1 : GloveData
+glove1 : Glove
 glove1 =
     { texture = "Armor_10"
     }

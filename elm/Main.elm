@@ -35,11 +35,11 @@ init _ =
             , mana = 100
             , appState = Title
             , inventory =
-                { weapon = Weapon sword1
-                , helmet = Helmet helmet1
-                , armor = Armor armor1
-                , glove = Glove glove1
-                , accessory = Accessory accessory1
+                { weapon = Just sword2
+                , helmet = Just helmet1
+                , armor = Just armor1
+                , glove = Just glove1
+                , accessory = Just accessory1
                 }
             }
 

@@ -5,6 +5,7 @@ import Data exposing (..)
 import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
+import Weapon exposing (..)
 
 
 render : Model -> QuestData -> List (Entity Msg)
@@ -96,33 +97,52 @@ inventorySlots model =
 inventory : Inventory -> List (Entity Msg)
 inventory i =
     []
-        |> renderEquipment i.weapon
-        |> renderEquipment i.helmet
-        |> renderEquipment i.accessory
-        |> renderEquipment i.glove
-        |> renderEquipment i.armor
+        |> renderWeapon i.weapon
+        |> renderArmor i.armor
 
 
-renderEquipment : Equipment -> List (Entity Msg) -> List (Entity Msg)
-renderEquipment eq list =
-    case eq of
-        Weapon data ->
-            Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
-        Helmet data ->
-            Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+-- |> renderEquipment i.helmet
+-- |> renderEquipment i.accessory
+-- |> renderEquipment i.glove
 
-        Accessory data ->
-            Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
-        Armor data ->
-            Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+renderWeapon : Maybe Weapon -> List (Entity Msg) -> List (Entity Msg)
+renderWeapon weapon list =
+    case weapon of
+        Just w ->
+            Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture w.texture ] [] :: list
 
-        Glove data ->
-            Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
-
-        None ->
+        Nothing ->
             list
+
+
+renderArmor : Maybe Armor -> List (Entity Msg) -> List (Entity Msg)
+renderArmor armor list =
+    case armor of
+        Just a ->
+            Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture a.texture ] [] :: list
+
+        Nothing ->
+            list
+
+
+
+-- renderEquipment : Equipment -> List (Entity Msg) -> List (Entity Msg)
+-- renderEquipment eq list =
+--     case eq of
+--         Weapon data ->
+--             Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+--         Helmet data ->
+--             Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+--         Accessory data ->
+--             Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+--         Armor data ->
+--             Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+--         Glove data ->
+--             Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
+--         None ->
+--             list
 
 
 skills : Model -> List (Entity Msg)
@@ -222,8 +242,7 @@ updateHp turn gameState quest =
                     { currentRoom
                         | enemy =
                             { enemy
-                              -- TODO: Use weapon damage
-                                | currentHp = enemy.currentHp - 10
+                                | currentHp = enemy.currentHp - (Maybe.withDefault sword1 gameState.inventory.weapon).damage
                             }
                     }
             }

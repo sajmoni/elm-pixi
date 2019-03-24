@@ -1,9 +1,9 @@
 module Helmet exposing (helmet1)
 
-import Model exposing (HelmetData)
+import Model exposing (Helmet)
 
 
-helmet1 : HelmetData
+helmet1 : Helmet
 helmet1 =
     { texture = "Armor_10"
     }
