@@ -2,9 +2,9 @@ module Quest exposing (behaviors, combat, dealDamage, getQuest, inventory, inven
 
 import Bar
 import Data exposing (..)
+import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
-import Shared exposing (..)
 
 
 render : Model -> QuestData -> List (Entity Msg)

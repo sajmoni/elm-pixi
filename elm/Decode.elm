@@ -1,9 +1,9 @@
 module Decode exposing (decodePixiEvent)
 
 import Json.Decode as D
+import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
-import Shared exposing (..)
 
 
 stringDecoder : String -> D.Decoder String

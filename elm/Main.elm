@@ -10,13 +10,13 @@ import Glove exposing (..)
 import Helmet exposing (..)
 import Json.Encode exposing (..)
 import Juice exposing (..)
+import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
 import Platform
 import Port
 import Quest as QuestModule
 import Random
-import Shared exposing (..)
 import Time
 import Title as TitleModule
 import Town as TownModule

@@ -1,6 +1,6 @@
 module Weapon exposing (sword1)
 
-import Shared exposing (WeaponData)
+import Model exposing (WeaponData)
 
 
 sword1 : WeaponData

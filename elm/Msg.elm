@@ -1,7 +1,7 @@
 module Msg exposing (Msg(..))
 
+import Model exposing (..)
 import Pixi exposing (..)
-import Shared exposing (..)
 
 
 type Msg

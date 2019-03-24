@@ -1,7 +1,7 @@
 module Data exposing (getCurrentRoom, getQuest, getRoom, mapQuest)
 
+import Model exposing (..)
 import Monster exposing (..)
-import Shared exposing (..)
 
 
 getMonster random =

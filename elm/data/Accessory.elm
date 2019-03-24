@@ -1,6 +1,6 @@
 module Accessory exposing (accessory1)
 
-import Shared exposing (AccessoryData)
+import Model exposing (AccessoryData)
 
 
 accessory1 : AccessoryData

@@ -1,9 +1,9 @@
 module Title exposing (behaviors, render)
 
 import Juice exposing (..)
+import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
-import Shared exposing (..)
 
 
 behaviors =

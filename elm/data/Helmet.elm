@@ -1,6 +1,6 @@
 module Helmet exposing (helmet1)
 
-import Shared exposing (HelmetData)
+import Model exposing (HelmetData)
 
 
 helmet1 : HelmetData

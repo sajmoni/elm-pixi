@@ -1,9 +1,9 @@
 module Encode exposing (encodeEntities)
 
 import Json.Encode as E
+import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
-import Shared exposing (..)
 
 
 encodeEntities : List (Entity Msg) -> E.Value

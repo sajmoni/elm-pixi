@@ -1,6 +1,6 @@
 module Glove exposing (glove1)
 
-import Shared exposing (GloveData)
+import Model exposing (GloveData)
 
 
 glove1 : GloveData

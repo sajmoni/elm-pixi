@@ -1,6 +1,6 @@
 module Armor exposing (armor1)
 
-import Shared exposing (ArmorData)
+import Model exposing (ArmorData)
 
 
 armor1 : ArmorData

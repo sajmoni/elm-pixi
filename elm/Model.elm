@@ -1,4 +1,4 @@
-module Shared exposing (AccessoryData, AppState(..), ArmorData, Behavior, Damage, Delta, Enemy, Equipment(..), EventData, GameState, GloveData, HelmetData, Inventory, Model, Player, QuestData, Room, Turn(..), WeaponData)
+module Model exposing (AccessoryData, AppState(..), ArmorData, Behavior, Damage, Delta, Enemy, Equipment(..), EventData, GameState, GloveData, HelmetData, Inventory, Model, Player, QuestData, Room, Turn(..), WeaponData)
 
 import Pixi exposing (..)
 

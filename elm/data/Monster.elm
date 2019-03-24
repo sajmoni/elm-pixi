@@ -1,6 +1,6 @@
 module Monster exposing (monster0, monster1, monster2)
 
-import Shared exposing (Enemy)
+import Model exposing (Enemy)
 
 
 monster0 : Enemy

@@ -2,8 +2,8 @@ port module Port exposing (incoming, init, update)
 
 import Json.Decode
 import Json.Encode
+import Model exposing (..)
 import Pixi exposing (..)
-import Shared exposing (..)
 
 
 
