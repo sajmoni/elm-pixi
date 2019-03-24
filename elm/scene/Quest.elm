@@ -101,29 +101,28 @@ inventory i =
         |> renderEquipment i.accessory
         |> renderEquipment i.glove
         |> renderEquipment i.armor
-        |> List.filterMap identity
 
 
-renderEquipment : Equipment -> List (Maybe (Entity Msg)) -> List (Maybe (Entity Msg))
+renderEquipment : Equipment -> List (Entity Msg) -> List (Entity Msg)
 renderEquipment eq list =
     case eq of
         Weapon data ->
-            Just (Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
+            Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
         Helmet data ->
-            Just (Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
+            Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
         Accessory data ->
-            Just (Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
+            Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
         Armor data ->
-            Just (Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
+            Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
         Glove data ->
-            Just (Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
+            Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
 
-        _ ->
-            Nothing :: list
+        None ->
+            list
 
 
 skills : Model -> List (Entity Msg)
