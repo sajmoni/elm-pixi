@@ -11,7 +11,7 @@ render : Model -> QuestData -> List (Entity Msg)
 render model quest =
     manaBar model.gameState.mana
         :: (monster quest.currentRoom
-                :: player quest.player
+                :: renderPlayer quest.player
                 :: inventorySlots model
                 ++ skills model
                 ++ enemyHealth quest.currentRoom
@@ -78,8 +78,8 @@ monster currentRoom =
     Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.enemy.textures, animationSpeed 0.015 ] []
 
 
-player : Player -> Entity Msg
-player p =
+renderPlayer : Player -> Entity Msg
+renderPlayer p =
     Pixi.animatedSprite [ id "player", x 100, y 100, scale 6, textures p.textures, animationSpeed 0.015 ] []
 
 
@@ -95,10 +95,6 @@ inventorySlots model =
 
 inventory : Inventory -> List (Entity Msg)
 inventory i =
-    let
-        inventoryToRender =
-            []
-    in
     []
         |> renderEquipment i.weapon
         |> renderEquipment i.helmet
@@ -208,6 +204,40 @@ getQuest gameState =
             Debug.todo "getQuest crashed"
 
 
+updateHp : Turn -> GameState -> QuestData -> QuestData
+updateHp turn gameState quest =
+    let
+        currentRoom =
+            quest.currentRoom
+
+        enemy =
+            currentRoom.enemy
+
+        player =
+            quest.player
+    in
+    case turn of
+        PlayerTurn ->
+            { quest
+                | currentRoom =
+                    { currentRoom
+                        | enemy =
+                            { enemy
+                              -- TODO: Use weapon damage
+                                | currentHp = enemy.currentHp - 10
+                            }
+                    }
+            }
+
+        EnemyTurn ->
+            { quest
+                | player =
+                    { player
+                        | currentHp = player.currentHp - enemy.damage
+                    }
+            }
+
+
 combat : Int -> Int -> Behavior
 combat firstUpdate everyNthUpdate delta updates gameState =
     let
@@ -226,11 +256,11 @@ combat firstUpdate everyNthUpdate delta updates gameState =
                 else
                     PlayerTurn
 
-            newHp =
-                quest.currentRoom.enemy.currentHp - 1
+            questWithUpdatedHp =
+                updateHp newTurn gameState quest
 
             currentRoom =
-                quest.currentRoom
+                questWithUpdatedHp.currentRoom
 
             enemy =
                 currentRoom.enemy
@@ -238,15 +268,11 @@ combat firstUpdate everyNthUpdate delta updates gameState =
         { gameState
             | appState =
                 Quest
-                    { rooms = quest.rooms
-                    , player = quest.player
+                    { rooms = questWithUpdatedHp.rooms
+                    , player = questWithUpdatedHp.player
                     , currentRoom =
                         { currentRoom
                             | turn = newTurn
-                            , enemy =
-                                { enemy
-                                    | currentHp = newHp
-                                }
                         }
                     }
         }

@@ -45,6 +45,7 @@ type alias Room =
 type alias Enemy =
     { maxHp : Int
     , currentHp : Int
+    , damage : Int
     , textures : List String
     }
 

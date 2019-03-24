@@ -28,10 +28,7 @@ getRoom index random =
     { index = index
     , turn = PlayerTurn
     , enemy =
-        { currentHp = monster.currentHp
-        , maxHp = monster.maxHp
-        , textures = monster.textures
-        }
+        monster
     }
 
 
