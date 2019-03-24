@@ -16,6 +16,7 @@ import Shared exposing (..)
 import Time
 import Title as TitleModule
 import Town as TownModule
+import Weapon exposing (..)
 
 
 init : flags -> ( Model, Cmd msg )
@@ -30,7 +31,7 @@ init _ =
             , mana = 100
             , appState = Title
             , inventory =
-                { weapon = Weapon "Weapon_01" 10
+                { weapon = Weapon sword1
                 , helmet = Helmet "Weapon_02"
                 , armor = Armor "Weapon_03"
                 , glove = Glove "Weapon_04"

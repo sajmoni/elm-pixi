@@ -20,6 +20,12 @@ app.loader.add('spritesheet/monster.json');
 app.loader.add('spritesheet/skill.json');
 app.loader.add('spritesheet/equipment.json');
 app.loader.add('spritesheet/weapons.json');
+app.loader.add('spritesheet/accessory.json');
+app.loader.add('spritesheet/armor.json');
+app.loader.add('spritesheet/crafting.json');
+app.loader.add('spritesheet/misc.json');
+app.loader.add('spritesheet/potion.json');
+app.loader.add('spritesheet/shield.json');
 app.loader.add('spritesheet/player.json');
 
 const getTexture = makeGetTexture(app);
@@ -50,7 +56,12 @@ const init = () => {
   });
 
   handleUpdate({
-    update, entityMap, addEntity, getTexture, incoming, removeEntity,
+    update,
+    entityMap,
+    addEntity,
+    getTexture,
+    incoming,
+    removeEntity,
   });
 };
 

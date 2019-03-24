@@ -1,27 +1,7 @@
 module Data exposing (getCurrentRoom, getQuest, getRoom, mapQuest)
 
+import Monster exposing (..)
 import Shared exposing (..)
-
-
-monster0 =
-    { maxHp = 60
-    , currentHp = 60
-    , textures = [ "monster_17", "monster_18" ]
-    }
-
-
-monster1 =
-    { maxHp = 80
-    , currentHp = 80
-    , textures = [ "monster_19", "monster_20" ]
-    }
-
-
-monster2 =
-    { maxHp = 100
-    , currentHp = 100
-    , textures = [ "monster_21", "monster_22" ]
-    }
 
 
 getMonster random =

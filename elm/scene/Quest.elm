@@ -111,8 +111,8 @@ inventory i =
 renderEquipment : Equipment -> List (Maybe (Entity Msg)) -> List (Maybe (Entity Msg))
 renderEquipment eq list =
     case eq of
-        Weapon image _ ->
-            Just (Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+        Weapon data ->
+            Just (Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
 
         Helmet image ->
             Just (Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture image ] []) :: list
