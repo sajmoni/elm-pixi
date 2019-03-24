@@ -7,24 +7,26 @@
   "scripts": {
     "elm": "chokidar '**/*.elm' -c 'elm make elm/Main.elm --output public/elm.js --debug' --initial",
     "watch": "watchify js/index.js -o public/bundle.js -t [ babelify ] --debug",
+    "build": "browserify -p [ tinyify --no-flat ] js/index.js -o public/bundle.js -t [ babelify ]",
     "start": "http-server -p 8080"
   },
   "dependencies": {
     "elm": "0.19.0-bugfix6",
     "lodash": "4.17.11",
-    "pixi.js": "4.8.5"
+    "pixi.js": "4.8.7"
   },
   "devDependencies": {
-    "@babel/core": "7.2.2",
-    "@babel/preset-env": "7.3.1",
+    "@babel/core": "7.4.0",
+    "@babel/preset-env": "7.4.2",
     "babelify": "10.0.0",
     "browserify": "16.2.3",
     "chokidar-cli": "1.2.2",
-    "eslint": "5.13.0",
+    "eslint": "5.15.3",
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-plugin-import": "2.16.0",
     "http-server": "0.11.1",
     "prettier": "1.16.4",
-    "watchify": "3.11.0"
+    "tinyify": "2.5.0",
+    "watchify": "3.11.1"
   }
 }
