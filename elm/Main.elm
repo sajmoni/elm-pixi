@@ -1,9 +1,13 @@
 module Main exposing (init)
 
+import Accessory exposing (..)
+import Armor exposing (..)
 import Browser.Events
 import Data exposing (..)
 import Decode exposing (..)
 import Encode exposing (..)
+import Glove exposing (..)
+import Helmet exposing (..)
 import Json.Encode exposing (..)
 import Juice exposing (..)
 import Msg exposing (..)
@@ -32,10 +36,10 @@ init _ =
             , appState = Title
             , inventory =
                 { weapon = Weapon sword1
-                , helmet = Helmet "Weapon_02"
-                , armor = Armor "Weapon_03"
-                , glove = Glove "Weapon_04"
-                , accessory = Accessory "Weapon_05"
+                , helmet = Helmet helmet1
+                , armor = Armor armor1
+                , glove = Glove glove1
+                , accessory = Accessory accessory1
                 }
             }
 

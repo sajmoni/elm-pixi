@@ -114,17 +114,17 @@ renderEquipment eq list =
         Weapon data ->
             Just (Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
 
-        Helmet image ->
-            Just (Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture image ] []) :: list
+        Helmet data ->
+            Just (Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
 
-        Accessory image ->
-            Just (Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+        Accessory data ->
+            Just (Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
 
-        Armor image ->
-            Just (Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+        Armor data ->
+            Just (Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
 
-        Glove image ->
-            Just (Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture image ] []) :: list
+        Glove data ->
+            Just (Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture data.texture ] []) :: list
 
         _ ->
             Nothing :: list
