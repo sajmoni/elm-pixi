@@ -5,5 +5,5 @@ import Model exposing (Accessory)
 
 accessory1 : Accessory
 accessory1 =
-    { texture = "Armor_20"
+    { texture = "Accessory_01"
     }

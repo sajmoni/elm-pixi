@@ -1,4 +1,4 @@
-module Quest exposing (behaviors, combat, dealDamage, getQuest, inventory, inventoryStartPositionY, manaBar, monster, render, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana)
+module Quest exposing (accessoryPosition, armorPosition, behaviors, checkIfPlayerDead, combat, dealDamage, enemyHealth, enemyHealthBar, getQuest, glovePosition, helmetPosition, inventory, inventorySlots, inventoryStartPosition, manaBar, monster, nextRoom, playerHealth, playerHealthBar, render, renderAccessory, renderArmor, renderGlove, renderHelmet, renderPlayer, renderWeapon, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana, updateHp, weaponPosition)
 
 import Bar
 import Data exposing (..)
@@ -6,6 +6,54 @@ import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
 import Weapon exposing (..)
+
+
+skillWidth =
+    120
+
+
+skillStartPositionX =
+    40
+
+
+skillStartPositionY =
+    800
+
+
+inventoryStartPosition =
+    { x = 60
+    , y = 350
+    }
+
+
+helmetPosition =
+    { x = inventoryStartPosition.x + 90
+    , y = inventoryStartPosition.y
+    }
+
+
+armorPosition =
+    { x = inventoryStartPosition.x + 80
+    , y = inventoryStartPosition.y + 90
+    }
+
+
+accessoryPosition =
+    { x = inventoryStartPosition.x
+    , y = inventoryStartPosition.y + 90
+    }
+
+
+weaponPosition =
+    { x = inventoryStartPosition.x + 210
+    , y = inventoryStartPosition.y + 90
+    }
+
+
+glovePosition =
+    { x = inventoryStartPosition.x + 210
+    , y = inventoryStartPosition.y + 190
+    }
 
 
 render : Model -> QuestData -> List (Entity Msg)
@@ -76,21 +124,21 @@ manaBar mana =
 
 monster : Room -> Entity Msg
 monster currentRoom =
-    Pixi.animatedSprite [ id "enemy", x 400, y 100, scale 6, textures currentRoom.enemy.textures, animationSpeed 0.015 ] []
+    Pixi.animatedSprite [ id "enemy", x 370, y 70, scale 8, textures currentRoom.enemy.textures, animationSpeed 0.015 ] []
 
 
 renderPlayer : Player -> Entity Msg
 renderPlayer p =
-    Pixi.animatedSprite [ id "player", x 100, y 100, scale 6, textures p.textures, animationSpeed 0.015 ] []
+    Pixi.animatedSprite [ id "player", x 70, y 70, scale 8, textures p.textures, animationSpeed 0.015 ] []
 
 
 inventorySlots : Model -> List (Entity Msg)
 inventorySlots model =
-    [ Pixi.sprite [ id "helmetSlot", x skillStartPositionX, y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_29" ] []
-    , Pixi.sprite [ id "bodySlot", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_25" ] []
-    , Pixi.sprite [ id "accessorySlot", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_29" ] []
-    , Pixi.sprite [ id "gloveSlot", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_28" ] []
-    , Pixi.sprite [ id "weaponSlot", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 4, alpha 0.7, texture "equipment_33" ] []
+    [ Pixi.sprite [ id "helmetSlot", x helmetPosition.x, y helmetPosition.y, scale 4, alpha 0.7, texture "equipment_29" ] []
+    , Pixi.sprite [ id "armorSlot", x armorPosition.x, y armorPosition.y, scale 6, alpha 0.7, texture "equipment_25" ] []
+    , Pixi.sprite [ id "accessorySlot", x accessoryPosition.x, y accessoryPosition.y, scale 4, alpha 0.7, texture "equipment_29" ] []
+    , Pixi.sprite [ id "gloveSlot", x glovePosition.x, y glovePosition.y, scale 4, alpha 0.7, texture "equipment_28" ] []
+    , Pixi.sprite [ id "weaponSlot", x weaponPosition.x, y weaponPosition.y, scale 4, alpha 0.7, texture "equipment_33" ] []
     ]
 
 
@@ -99,19 +147,16 @@ inventory i =
     []
         |> renderWeapon i.weapon
         |> renderArmor i.armor
-
-
-
--- |> renderEquipment i.helmet
--- |> renderEquipment i.accessory
--- |> renderEquipment i.glove
+        |> renderHelmet i.helmet
+        |> renderAccessory i.accessory
+        |> renderGlove i.glove
 
 
 renderWeapon : Maybe Weapon -> List (Entity Msg) -> List (Entity Msg)
 renderWeapon weapon list =
     case weapon of
         Just w ->
-            Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture w.texture ] [] :: list
+            Pixi.sprite [ id "weapon", x weaponPosition.x, y weaponPosition.y, scale 5, texture w.texture ] [] :: list
 
         Nothing ->
             list
@@ -121,28 +166,40 @@ renderArmor : Maybe Armor -> List (Entity Msg) -> List (Entity Msg)
 renderArmor armor list =
     case armor of
         Just a ->
-            Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture a.texture ] [] :: list
+            Pixi.sprite [ id "armor", x armorPosition.x, y armorPosition.y, scale 7, texture a.texture ] [] :: list
 
         Nothing ->
             list
 
 
+renderHelmet : Maybe Helmet -> List (Entity Msg) -> List (Entity Msg)
+renderHelmet helmet list =
+    case helmet of
+        Just h ->
+            Pixi.sprite [ id "helmet", x helmetPosition.x, y helmetPosition.y, scale 5, texture h.texture ] [] :: list
 
--- renderEquipment : Equipment -> List (Entity Msg) -> List (Entity Msg)
--- renderEquipment eq list =
---     case eq of
---         Weapon data ->
---             Pixi.sprite [ id "weapon", x (skillStartPositionX + skillWidth * 4), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
---         Helmet data ->
---             Pixi.sprite [ id "helmet", x skillStartPositionX, y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
---         Accessory data ->
---             Pixi.sprite [ id "accessory", x (skillStartPositionX + skillWidth * 2), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
---         Armor data ->
---             Pixi.sprite [ id "body", x (skillStartPositionX + skillWidth), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
---         Glove data ->
---             Pixi.sprite [ id "glove", x (skillStartPositionX + skillWidth * 3), y inventoryStartPositionY, scale 5, texture data.texture ] [] :: list
---         None ->
---             list
+        Nothing ->
+            list
+
+
+renderAccessory : Maybe Accessory -> List (Entity Msg) -> List (Entity Msg)
+renderAccessory accessory list =
+    case accessory of
+        Just a ->
+            Pixi.sprite [ id "accessory", x accessoryPosition.x, y accessoryPosition.y, scale 5, texture a.texture ] [] :: list
+
+        Nothing ->
+            list
+
+
+renderGlove : Maybe Glove -> List (Entity Msg) -> List (Entity Msg)
+renderGlove glove list =
+    case glove of
+        Just g ->
+            Pixi.sprite [ id "glove", x glovePosition.x, y glovePosition.y, scale 5, texture g.texture ] [] :: list
+
+        Nothing ->
+            list
 
 
 skills : Model -> List (Entity Msg)
@@ -160,22 +217,6 @@ behaviors currentUpdate =
     [ combat currentUpdate 60
     , checkIfPlayerDead
     ]
-
-
-skillWidth =
-    120
-
-
-skillStartPositionX =
-    40
-
-
-skillStartPositionY =
-    800
-
-
-inventoryStartPositionY =
-    500
 
 
 shouldExecuteUpdate : Int -> Int -> Int -> Bool

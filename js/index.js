@@ -9,7 +9,7 @@ PIXI.settings.RESOLUTION = 2;
 const app = new PIXI.Application({
   height: 1136,
   width: 640,
-  backgroundColor: 0x000000,
+  backgroundColor: 0x303030,
 });
 
 document.getElementById('game').appendChild(app.view);
