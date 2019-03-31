@@ -46,6 +46,8 @@ export default ({
         // handleOn({ on, entity: container, incoming });
 
         // addEntity(id, container, parent);
+      } else if (entity.type === 'Empty') {
+        return;
       }
       if (entity.x) {
         displayObject.x = entity.x;

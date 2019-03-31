@@ -3,16 +3,40 @@ module Model exposing (Accessory, AppState(..), Armor, Behavior, Damage, Delta, 
 import Pixi exposing (..)
 
 
+type alias Model =
+    { updates : Int
+    , behaviors : List Behavior
+    , gameState : GameState
+    }
+
+
+type alias GameState =
+    { monsterX : Float
+    , textColor : String
+    , mana : Int
+    , inventory : Inventory
+    , appState : AppState
+    }
+
+
 type AppState
     = Title
     | Town
     | Quest QuestData
 
 
-type alias Model =
-    { updates : Int
-    , behaviors : List Behavior
-    , gameState : GameState
+type alias QuestData =
+    { rooms : List Room
+    , currentRoom : Room
+    , player : Player
+    }
+
+
+type alias Player =
+    { maxHp : Int
+    , currentHp : Int
+    , textures : List String
+    , attacking : Bool
     }
 
 
@@ -47,20 +71,6 @@ type alias Enemy =
     , currentHp : Int
     , damage : Int
     , textures : List String
-    }
-
-
-type alias Player =
-    { maxHp : Int
-    , currentHp : Int
-    , textures : List String
-    }
-
-
-type alias QuestData =
-    { rooms : List Room
-    , currentRoom : Room
-    , player : Player
     }
 
 
@@ -100,13 +110,4 @@ type alias Inventory =
     , weapon : Maybe Weapon
     , accessory : Maybe Accessory
     , glove : Maybe Glove
-    }
-
-
-type alias GameState =
-    { monsterX : Float
-    , textColor : String
-    , mana : Int
-    , inventory : Inventory
-    , appState : AppState
     }

@@ -22,7 +22,7 @@ Open three terminal windows and run:
 TODO:
 
 - Lost game when player health is 0 (2)
-- Animations when spells are used (2)
+- Animations when spells are used (3)
 - Virtual Stage (8)
 - Handle children (8)
 - Fade in/out (Add parabola to Juice) (2)
@@ -35,4 +35,6 @@ With `elm-pixi`, every render we need to check if any properties on the view ele
 
 ## Drawbacks
 
-Elm will own all state of the game. This means that
+Elm will own all state of the game. This means that everything has to originate from within Elm. For example Physics.
+
+

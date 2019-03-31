@@ -61,12 +61,64 @@ render model quest =
     manaBar model.gameState.mana
         :: (monster quest.currentRoom
                 :: renderPlayer quest.player
+                :: slash quest.player.attacking
                 :: inventorySlots model
                 ++ skills model
                 ++ enemyHealth quest.currentRoom
                 ++ playerHealth quest.player
                 ++ inventory model.gameState.inventory
            )
+
+
+renderEffect : Entity Msg
+renderEffect =
+    Pixi.animatedSprite
+        [ id "effect"
+        , x 370
+        , y 70
+        , scale 7
+        , animationSpeed 0.1
+        , textures
+            [ "ExplodeA00"
+            , "ExplodeA01"
+            , "ExplodeA02"
+            , "ExplodeA03"
+            , "ExplodeA04"
+            , "ExplodeA05"
+            , "ExplodeA06"
+            , "ExplodeA07"
+            , "ExplodeA08"
+            , "ExplodeA09"
+            , "ExplodeA10"
+            , "ExplodeA11"
+            ]
+        ]
+        []
+
+
+slash : Bool -> Entity Msg
+slash show =
+    if show then
+        Pixi.animatedSprite
+            [ id "effect"
+            , x 370
+            , y 70
+            , scale 7
+            , animationSpeed 0.2
+            , textures
+                [ "Slash16"
+                , "Slash15"
+                , "Slash14"
+                , "Slash13"
+                , "Slash12"
+                , "Slash11"
+                , "Slash10"
+                ]
+            ]
+            []
+
+    else
+        Pixi.empty
 
 
 enemyHealthBar : Room -> Entity Msg
@@ -286,6 +338,10 @@ updateHp turn gameState quest =
                                 | currentHp = enemy.currentHp - (Maybe.withDefault sword1 gameState.inventory.weapon).damage
                             }
                     }
+                , player =
+                    { player
+                        | attacking = True
+                    }
             }
 
         EnemyTurn ->
@@ -320,9 +376,6 @@ combat firstUpdate everyNthUpdate delta updates gameState =
 
             currentRoom =
                 questWithUpdatedHp.currentRoom
-
-            enemy =
-                currentRoom.enemy
         in
         { gameState
             | appState =

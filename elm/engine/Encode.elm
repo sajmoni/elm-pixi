@@ -59,6 +59,12 @@ encodeEntity entity =
                     :: encode attributes
                 )
 
+        Empty attributes children ->
+            E.object
+                (( "type", E.string "Empty" )
+                    :: encode attributes
+                )
+
         _ ->
             Debug.todo "encoding failed"
 

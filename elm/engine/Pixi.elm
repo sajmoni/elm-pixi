@@ -1,4 +1,4 @@
-module Pixi exposing (Attribute(..), Entity(..), Height, Shape(..), TextStyle(..), Width, alpha, animatedSprite, animationSpeed, color, container, fill, fontSize, graphics, id, on, scale, shape, sprite, text, textString, textStyle, texture, textures, x, y)
+module Pixi exposing (Attribute(..), Entity(..), Height, Shape(..), TextStyle(..), Width, alpha, anchor, animatedSprite, animationSpeed, color, container, empty, fill, fontSize, graphics, id, on, scale, shape, sprite, text, textString, textStyle, texture, textures, x, y)
 
 
 type alias Width =
@@ -20,6 +20,7 @@ type Entity msg
     | Text (List (Attribute msg)) (List (Entity msg))
     | Graphics (List (Attribute msg)) (List (Entity msg))
     | Container (List (Attribute msg)) (List (Entity msg))
+    | Empty (List (Attribute msg)) (List (Entity msg))
     | NotImplemented
 
 
@@ -156,3 +157,8 @@ graphics attributes children =
 container : List (Attribute msg) -> List (Entity msg) -> Entity msg
 container attributes children =
     Container attributes children
+
+
+empty : Entity msg
+empty =
+    Empty [] []

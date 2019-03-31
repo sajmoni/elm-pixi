@@ -27,6 +27,7 @@ app.loader.add('spritesheet/misc.json');
 app.loader.add('spritesheet/potion.json');
 app.loader.add('spritesheet/shield.json');
 app.loader.add('spritesheet/player.json');
+app.loader.add('spritesheet/effect.json');
 
 const getTexture = makeGetTexture(app);
 
