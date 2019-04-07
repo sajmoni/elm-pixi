@@ -1,11 +1,12 @@
-module Model exposing (Accessory, AppState(..), Armor, Behavior, Damage, Delta, Enemy, EventData, GameState, Glove, Helmet, Inventory, Model, Player, QuestData, Room, Turn(..), Weapon)
+module Model exposing (Accessory, AppState(..), Armor, Damage, Delta, Enemy, EventData, GameState, Glove, Helmet, Inventory, Model, Player, QuestData, Room, Turn(..), Weapon)
 
+import Behavior as B
 import Pixi exposing (..)
 
 
 type alias Model =
     { updates : Int
-    , behaviors : List Behavior
+    , behaviors : List (B.Behavior GameState)
     , gameState : GameState
     }
 
@@ -42,10 +43,6 @@ type alias Player =
 
 type alias Delta =
     Float
-
-
-type alias Behavior =
-    Delta -> Int -> GameState -> GameState
 
 
 type alias EventData =

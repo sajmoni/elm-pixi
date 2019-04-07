@@ -2,6 +2,7 @@ module Main exposing (init)
 
 import Accessory exposing (..)
 import Armor exposing (..)
+import Behavior as B
 import Browser.Events
 import Data exposing (..)
 import Decode exposing (..)
@@ -27,7 +28,7 @@ init : flags -> ( Model, Cmd msg )
 init _ =
     let
         behaviors =
-            TitleModule.behaviors
+            TitleModule.behaviors 0
 
         gameState =
             { monsterX = 10
@@ -77,16 +78,6 @@ initScene updates appState model =
 
         _ ->
             Debug.todo "initScene" appState
-
-
-updateGameState : Delta -> Int -> GameState -> List Behavior -> GameState
-updateGameState delta updates gameState behaviors =
-    behaviors |> List.foldl (updater delta updates) gameState
-
-
-updater : Delta -> Int -> Behavior -> GameState -> GameState
-updater delta updates behavior gameState =
-    behavior delta updates gameState
 
 
 setTextColor : String -> GameState -> GameState
@@ -164,7 +155,7 @@ update msg lastModel =
                 Tick delta ->
                     ( { lastModel
                         | updates = lastModel.updates + 1
-                        , gameState = lastModel.behaviors |> updateGameState delta lastModel.updates lastModel.gameState
+                        , gameState = lastModel.behaviors |> B.updateGameState delta lastModel.updates lastModel.gameState
                       }
                     , Cmd.none
                     )

@@ -1,6 +1,7 @@
 module Quest exposing (accessoryPosition, armorPosition, behaviors, checkIfPlayerDead, combat, dealDamage, enemyHealth, enemyHealthBar, getQuest, glovePosition, helmetPosition, inventory, inventorySlots, inventoryStartPosition, manaBar, monster, nextRoom, playerHealth, playerHealthBar, render, renderAccessory, renderArmor, renderGlove, renderHelmet, renderPlayer, renderWeapon, shouldExecuteUpdate, skillStartPositionX, skillStartPositionY, skillWidth, skills, spendMana, updateHp, weaponPosition)
 
 import Bar
+import Behavior as B
 import Data exposing (..)
 import Model exposing (..)
 import Msg exposing (..)
@@ -264,10 +265,10 @@ skills model =
     ]
 
 
-behaviors : Int -> List Behavior
+behaviors : Int -> List (B.Behavior GameState)
 behaviors currentUpdate =
-    [ combat currentUpdate 60
-    , checkIfPlayerDead
+    [ B.repeat combat 60 currentUpdate
+    , B.repeat checkIfPlayerDead 1 currentUpdate
     ]
 
 
@@ -353,48 +354,61 @@ updateHp turn gameState quest =
             }
 
 
-combat : Int -> Int -> Behavior
-combat firstUpdate everyNthUpdate delta updates gameState =
+
+-- endSlash : Int -> Int -> Behavior GameState
+-- endSlash firstUpdate everyNthUpdate delta updates gameState =
+--     let
+--         shouldUpdate =
+--             shouldExecuteUpdate firstUpdate everyNthUpdate updates
+--     in
+--     if shouldUpdate then
+--         let
+--             quest =
+--                 getQuest gameState
+--         in
+--         gameState
+--     else
+--         gameState
+-- addEndSlashBehavior: Int -> Turn -> Behavior
+-- addEndSlashBehavior currentUpdate turn =
+--     if turn == PlayerTurn then
+--         endSlash currentUpdate 12
+
+
+combat : B.UpdateFunction GameState
+combat delta currentUpdate gameState =
     let
-        shouldUpdate =
-            shouldExecuteUpdate firstUpdate everyNthUpdate updates
+        quest =
+            getQuest gameState
+
+        newTurn =
+            if quest.currentRoom.turn == PlayerTurn then
+                EnemyTurn
+
+            else
+                PlayerTurn
+
+        questWithUpdatedHp =
+            updateHp newTurn gameState quest
+
+        currentRoom =
+            questWithUpdatedHp.currentRoom
     in
-    if shouldUpdate then
-        let
-            quest =
-                getQuest gameState
-
-            newTurn =
-                if quest.currentRoom.turn == PlayerTurn then
-                    EnemyTurn
-
-                else
-                    PlayerTurn
-
-            questWithUpdatedHp =
-                updateHp newTurn gameState quest
-
-            currentRoom =
-                questWithUpdatedHp.currentRoom
-        in
-        { gameState
-            | appState =
-                Quest
-                    { rooms = questWithUpdatedHp.rooms
-                    , player = questWithUpdatedHp.player
-                    , currentRoom =
-                        { currentRoom
-                            | turn = newTurn
-                        }
+    { gameState
+        | appState =
+            Quest
+                { rooms = questWithUpdatedHp.rooms
+                , player = questWithUpdatedHp.player
+                , currentRoom =
+                    { currentRoom
+                        | turn = newTurn
                     }
-        }
-
-    else
-        gameState
+                }
+    }
 
 
-checkIfPlayerDead : Behavior
-checkIfPlayerDead delta updates gameState =
+checkIfPlayerDead : B.UpdateFunction GameState
+checkIfPlayerDead delta currentUpdate gameState =
     case gameState.appState of
         Quest questData ->
             if questData.currentRoom.enemy.currentHp > 0 then

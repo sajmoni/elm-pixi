@@ -1,19 +1,27 @@
 module Title exposing (behaviors, render)
 
+import Behavior as B
 import Juice exposing (..)
 import Model exposing (..)
 import Msg exposing (..)
 import Pixi exposing (..)
 
 
-behaviors =
-    [ moveRight
+behaviors : Int -> List (B.Behavior GameState)
+behaviors currentUpdate =
+    [ B.repeat moveRight 1 currentUpdate
     ]
 
 
-moveRight : Behavior
-moveRight delta updates gameState =
+moveRight : B.UpdateFunction GameState
+moveRight delta _ gameState =
     { gameState | monsterX = gameState.monsterX + (10 / delta) }
+
+
+
+-- moveRight : Behavior
+-- moveRight delta updates gameState =
+--     { gameState | monsterX = gameState.monsterX + (10 / delta) }
 
 
 getScale : Juicer

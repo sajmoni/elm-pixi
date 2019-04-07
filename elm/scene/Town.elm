@@ -2,11 +2,12 @@ module Town exposing (behaviors)
 
 -- import Msg exposing (..)
 
+import Behavior as B
 import Model exposing (..)
 import Pixi exposing (..)
 
 
-behaviors : List Behavior
+behaviors : List (B.Behavior GameState)
 behaviors =
     []
 
