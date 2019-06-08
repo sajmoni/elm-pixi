@@ -52,9 +52,7 @@ const init = () => {
       incoming,
       update,
     },
-  } = Elm.Main.init({
-    node: document.getElementById('elm'),
-  });
+  } = Elm.Main.init();
 
   handleUpdate({
     update,
