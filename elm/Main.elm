@@ -153,9 +153,14 @@ update msg lastModel =
                     newQuestGenerated list lastModel
 
                 Tick delta ->
+                    let
+                        ( newGameState, newBehaviors ) =
+                            lastModel.behaviors |> B.updateGameState delta lastModel.updates lastModel.gameState
+                    in
                     ( { lastModel
                         | updates = lastModel.updates + 1
-                        , gameState = lastModel.behaviors |> B.updateGameState delta lastModel.updates lastModel.gameState
+                        , gameState = newGameState
+                        , behaviors = newBehaviors
                       }
                     , Cmd.none
                     )

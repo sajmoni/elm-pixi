@@ -9,13 +9,13 @@ import Pixi exposing (..)
 
 behaviors : Int -> List (B.Behavior GameState)
 behaviors currentUpdate =
-    [ B.repeat moveRight 1 currentUpdate
+    [ B.repeat "moveRight" moveRight 1 currentUpdate
     ]
 
 
 moveRight : B.UpdateFunction GameState
 moveRight delta _ gameState =
-    { gameState | monsterX = gameState.monsterX + (10 / delta) }
+    ( { gameState | monsterX = gameState.monsterX + (10 / delta) }, B.none )
 
 
 

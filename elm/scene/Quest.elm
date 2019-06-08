@@ -267,8 +267,8 @@ skills model =
 
 behaviors : Int -> List (B.Behavior GameState)
 behaviors currentUpdate =
-    [ B.repeat combat 60 currentUpdate
-    , B.repeat checkIfPlayerDead 1 currentUpdate
+    [ B.repeat "combat" combat 60 currentUpdate
+    , B.repeat "checkIfPlayerDead" checkIfPlayerDead 1 currentUpdate
     ]
 
 
@@ -354,25 +354,27 @@ updateHp turn gameState quest =
             }
 
 
+stopAttackAnimation : B.UpdateFunction GameState
+stopAttackAnimation delta currentUpdate gameState =
+    let
+        _ =
+            Debug.log "STOPPING ATTACK ANIMATION" currentUpdate
 
--- endSlash : Int -> Int -> Behavior GameState
--- endSlash firstUpdate everyNthUpdate delta updates gameState =
---     let
---         shouldUpdate =
---             shouldExecuteUpdate firstUpdate everyNthUpdate updates
---     in
---     if shouldUpdate then
---         let
---             quest =
---                 getQuest gameState
---         in
---         gameState
---     else
---         gameState
--- addEndSlashBehavior: Int -> Turn -> Behavior
--- addEndSlashBehavior currentUpdate turn =
---     if turn == PlayerTurn then
---         endSlash currentUpdate 12
+        quest =
+            getQuest gameState
+
+        player =
+            quest.player
+    in
+    ( { gameState
+        | appState =
+            Quest
+                { quest
+                    | player = { player | attacking = False }
+                }
+      }
+    , B.remove "attackAnimation"
+    )
 
 
 combat : B.UpdateFunction GameState
@@ -394,7 +396,7 @@ combat delta currentUpdate gameState =
         currentRoom =
             questWithUpdatedHp.currentRoom
     in
-    { gameState
+    ( { gameState
         | appState =
             Quest
                 { rooms = questWithUpdatedHp.rooms
@@ -404,7 +406,10 @@ combat delta currentUpdate gameState =
                         | turn = newTurn
                     }
                 }
-    }
+      }
+    , B.add (B.once "attackAnimation" stopAttackAnimation 13 currentUpdate)
+      -- , B.none
+    )
 
 
 checkIfPlayerDead : B.UpdateFunction GameState
@@ -412,10 +417,14 @@ checkIfPlayerDead delta currentUpdate gameState =
     case gameState.appState of
         Quest questData ->
             if questData.currentRoom.enemy.currentHp > 0 then
-                gameState
+                ( gameState, B.none )
 
             else
-                { gameState | appState = mapQuest nextRoom gameState.appState }
+                let
+                    _ =
+                        Debug.log "GOING TO NEXT"
+                in
+                ( { gameState | appState = mapQuest nextRoom gameState.appState }, B.none )
 
         _ ->
             Debug.todo "Should never happen"
