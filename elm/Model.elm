@@ -1,13 +1,13 @@
 module Model exposing (Accessory, AppState(..), Armor, Damage, Delta, Enemy, EventData, GameState, Glove, Helmet, Inventory, Model, Player, QuestData, Room, Turn(..), Weapon)
 
-import Behavior as B
+import Behavior exposing (..)
 import Pixi exposing (..)
 
 
 type alias Model =
     { updates : Int
-    , behaviors : List (B.Behavior GameState)
     , gameState : GameState
+    , behaviors : List (Behavior GameState)
     }
 
 
